@@ -69,6 +69,17 @@ app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
+# 注册自定义Jinja2过滤器
+@app.template_filter('from_json')
+def from_json_filter(value):
+    """将JSON字符串转换为Python对象"""
+    if not value:
+        return {}
+    try:
+        return json.loads(value)
+    except:
+        return {}
+
 # 初始化数据库（启动时执行）
 try:
     users = db.get_all_users()
