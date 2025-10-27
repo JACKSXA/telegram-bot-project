@@ -317,9 +317,20 @@ class DatabaseManager:
 # 全局数据库管理器实例
 _db_manager = None
 
-def get_database() -> DatabaseManager:
+def get_database(db_path: str = None) -> DatabaseManager:
     """获取数据库管理器实例（单例模式）"""
     global _db_manager
-    if _db_manager is None:
-        _db_manager = DatabaseManager()
-    return _db_manager
+    
+    # 从环境变量获取PostgreSQL连接
+    postgres_url = os.getenv('DATABASE_URL')
+    
+    if postgres_url and postgres_url.startswith('postgresql://'):
+        # 使用PostgreSQL
+        if _db_manager is None:
+            _db_manager = DatabaseManager()
+        return _db_manager
+    else:
+        # 使用SQLite
+        if _db_manager is None:
+            _db_manager = DatabaseManager(db_path)
+        return _db_manager
