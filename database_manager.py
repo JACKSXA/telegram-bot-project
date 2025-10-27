@@ -24,8 +24,10 @@ else:
 class DatabaseManager:
     """数据库管理器 - 自动选择PostgreSQL或SQLite"""
     
-    def __init__(self):
+    def __init__(self, db_path: str = None):
         self.lock = threading.Lock()
+        # 保存数据库路径
+        self.db_path = db_path or 'user_data.db'
         self._connect()
         self._create_tables()
     
@@ -35,7 +37,9 @@ class DatabaseManager:
             self.conn = psycopg2.connect(DATABASE_URL)
             self.cursor = self.conn.cursor()
         else:
-            self.db_path = 'user_data.db'
+            # 使用传入的路径或默认路径
+            if not hasattr(self, 'db_path'):
+                self.db_path = 'user_data.db'
     
     def _get_cursor(self):
         """获取游标"""
