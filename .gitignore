@@ -62,3 +62,6 @@ test_*.py
 *bot.log
 *flask.log
 
+# Railway/Nixpacks
+.nixpacks/
+
