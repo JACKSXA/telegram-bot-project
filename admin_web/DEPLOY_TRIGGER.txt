@@ -1,0 +1,2 @@
+Trigger Render redeploy - $(date)
+Database file size: $(ls -lh admin_web/user_data.db | awk '{print $5}')
