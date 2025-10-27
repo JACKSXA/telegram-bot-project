@@ -12,11 +12,14 @@ Telegram Bot 管理后台
 import os
 import sys
 import json
+import logging
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_session import Session
 import requests
 from dotenv import load_dotenv
+
+logging.basicConfig(level=logging.INFO)
 
 # 添加父目录到路径，以便导入 database_manager
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,8 +28,22 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv()
 
 # 导入数据库管理器
-from database_manager import get_database
-db = get_database()
+try:
+    from database_manager import get_database
+    db = get_database()
+    logger = logging.getLogger(__name__)
+    logger.info("✅ 数据库管理器导入成功")
+except Exception as e:
+    print(f"❌ 数据库管理器导入失败: {e}")
+    # 创建一个假数据库对象
+    class FakeDB:
+        def get_all_users(self): return []
+        def save_user(self, user_id, data): pass
+        def get_user(self, user_id): return None
+        def save_conversation(self, user_id, role, content): pass
+        def get_conversations(self, user_id, limit=100): return []
+        def get_wallet_info(self, user_id): return None
+    db = FakeDB()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
