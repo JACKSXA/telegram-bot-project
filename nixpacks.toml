@@ -8,5 +8,5 @@ cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
 cmds = []
 
 [start]
-cmd = "cd admin_web && gunicorn -w 2 -b 0.0.0.0:$PORT flask_app:app"
+cmd = "cd admin_web && python flask_app.py"
 
