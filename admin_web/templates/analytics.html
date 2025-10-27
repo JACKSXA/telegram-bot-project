@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}数据分析 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">数据分析</h1>
+    <p class="page-subtitle">用户转化漏斗和详细统计</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card primary">
+            <div class="stat-label">总用户数</div>
+            <div class="stat-value">{{ data.total_users }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-label">钱包转化率</div>
+            <div class="stat-value">{{ "%.1f"|format(data.conversion_rates.to_wallet) }}%</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-label">服务转化率</div>
+            <div class="stat-value">{{ "%.1f"|format(data.conversion_rates.to_service) }}%</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card info">
+            <div class="stat-label">转账转化率</div>
+            <div class="stat-value">{{ "%.1f"|format(data.conversion_rates.to_transfer) }}%</div>
+        </div>
+    </div>
+</div>
+
+<!-- 转化漏斗 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-funnel-dollar"></i> 转化漏斗
+            </div>
+            <div class="card-body">
+                <div class="funnel-container">
+                    {% set steps = [
+                        ('注册用户', data.total_users, 'primary'),
+                        ('创建钱包', (data.state_distribution.get('wallet_verified', 0) + data.state_distribution.get('bound_and_ready', 0)), 'success'),
+                        ('等待客服', data.state_distribution.get('waiting_customer_service', 0), 'warning'),
+                        ('已绑定', data.state_distribution.get('bound_and_ready', 0), 'info'),
+                        ('转账完成', data.state_distribution.get('transfer_completed', 0), 'danger')
+                    ] %}
+                    
+                    {% for step in steps %}
+                        <div class="funnel-step {{ step[2] }}">
+                            <div class="step-label">{{ step[0] }}</div>
+                            <div class="step-value">{{ step[1] }}</div>
+                            {% if loop.index < steps|length %}
+                                <div class="step-arrow">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i> 用户状态分布
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for state, count in data.state_distribution.items() %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                {% if state == 'waiting_customer_service' %}
+                                    <i class="fas fa-clock"></i> 等待客服
+                                {% elif state == 'bound_and_ready' %}
+                                    <i class="fas fa-check-circle"></i> 已绑定
+                                {% elif state == 'active' %}
+                                    <i class="fas fa-user"></i> 活跃
+                                {% else %}
+                                    {{ state }}
+                                {% endif %}
+                            </span>
+                            <span class="badge badge-primary">{{ count }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 语言分布 -->
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-language"></i> 语言分布
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for lang, count in data.language_distribution.items() %}
+            <div class="col-md-6 mb-3">
+                <div class="stat-card {{ 'primary' if lang == 'zh' else 'info' }}">
+                    <div class="stat-label">
+                        {% if lang == 'zh' %}
+                            <i class="fas fa-language"></i> 中文用户
+                        {% else %}
+                            <i class="fas fa-language"></i> English Users
+                        {% endif %}
+                    </div>
+                    <div class="stat-value">{{ count }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.funnel-container {
+    max-width: 100%;
+}
+
+.funnel-step {
+    padding: 20px 25px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fff;
+    border-left: 4px solid;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.funnel-step.primary { border-left-color: #007bff; }
+.funnel-step.success { border-left-color: #28a745; }
+.funnel-step.warning { border-left-color: #ffc107; }
+.funnel-step.info { border-left-color: #17a2b8; }
+.funnel-step.danger { border-left-color: #dc3545; }
+
+.funnel-step:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.step-label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.step-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c2c54;
+}
+
+.step-arrow {
+    text-align: center;
+    padding: 10px 0;
+    color: #6c757d;
+}
+
+.list-group {
+    border-radius: 8px;
+}
+
+.list-group-item {
+    border: 1px solid #e9ecef;
+    padding: 15px 20px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background: #f8f9fa;
+    transform: translateX(5px);
+}
+</style>
+{% endblock %}

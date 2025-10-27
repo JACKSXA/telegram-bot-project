@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3量化套利内部通道 - 限时招募</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 动态背景 */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: bgMove 20s linear infinite;
+        }
+
+        @keyframes bgMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部 */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+
+        /* 主要内容卡片 */
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease;
+        }
+
+        /* 收益展示 */
+        .profit-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .profit-item {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .profit-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .profit-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .profit-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* 特点列表 */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature-item {
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 福利部分 */
+        .benefits {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 40px;
+            border-radius: 15px;
+            color: white;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .benefits h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .benefits-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .benefit-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* CTA 按钮 */
+        .cta-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-top: 40px;
+        }
+
+        .cta-title {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .cta-desc {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 20px 60px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .telegram-info {
+            margin-top: 30px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .telegram-id {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 18px;
+        }
+
+        /* 信任标识 */
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin: 50px 0;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .trust-item {
+            text-align: center;
+        }
+
+        .trust-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .trust-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 常见问题 */
+        .faq {
+            margin: 50px 0;
+        }
+
+        .faq h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .faq-item {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: #f0f2ff;
+        }
+
+        .faq-question {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .faq-answer {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* 底部 */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .main-card {
+                padding: 30px 20px;
+            }
+
+            .profit-number {
+                font-size: 36px;
+            }
+
+            .cta-title {
+                font-size: 28px;
+            }
+
+            .cta-button {
+                padding: 15px 40px;
+                font-size: 18px;
+            }
+        }
+
+        /* 脉动效果 */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* 倒计时 */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .countdown-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 10px;
+        }
+
+        .countdown-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .countdown-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <header>
+            <div class="badge">🔥 限时招募中</div>
+            <h1>💎 Web3量化套利内部通道</h1>
+            <p class="subtitle">日化2-5%稳定收益 · 机构资金保驾护航 · 新人送$100 USDT</p>
+        </header>
+
+        <!-- 主卡片 -->
+        <div class="main-card">
+            <!-- 收益展示 -->
+            <div class="profit-showcase">
+                <div class="profit-item">
+                    <div class="profit-number">2-5%</div>
+                    <div class="profit-label">日化收益率</div>
+                </div>
+                <div class="profit-item">
+                    <div class="profit-number">$100</div>
+                    <div class="profit-label">新人体验金</div>
+                </div>
+                <div class="profit-item">
+                    <div class="profit-number">0</div>
+                    <div class="profit-label">零风险承诺</div>
+                </div>
+            </div>
+
+            <!-- 核心特点 -->
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-title">内部通道</div>
+                    <div class="feature-desc">接入顶级机构量化交易系统，普通人难以触及的高端通道</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-title">稳定收益</div>
+                    <div class="feature-desc">日化2-5%稳定收益，专业量化团队24小时运作</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-title">资金安全</div>
+                    <div class="feature-desc">使用全球排名前10交易所钱包，私钥自己掌控</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">即时到账</div>
+                    <div class="feature-desc">收益实时到账，随时可提现，资金流转透明</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎁</div>
+                    <div class="feature-title">新人福利</div>
+                    <div class="feature-desc">注册即送$100 USDT真实资金，零成本体验</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">👥</div>
+                    <div class="feature-title">专业指导</div>
+                    <div class="feature-desc">1对1专业客服，全程指导操作，小白也能轻松上手</div>
+                </div>
+            </div>
+
+            <!-- 信任标识 -->
+            <div class="trust-badges">
+                <div class="trust-item">
+                    <div class="trust-icon">🏆</div>
+                    <div class="trust-text">全球前10交易所</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">✅</div>
+                    <div class="trust-text">已服务5000+用户</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">🔐</div>
+                    <div class="trust-text">私钥自己掌控</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">💎</div>
+                    <div class="trust-text">机构级别资金</div>
+                </div>
+            </div>
+
+            <!-- 福利部分 -->
+            <div class="benefits">
+                <h2>🎉 新人专享福利</h2>
+                <p>立即加入，即可获得以下福利</p>
+                <div class="benefits-list">
+                    <div class="benefit-badge">💰 $100 USDT 真实资金</div>
+                    <div class="benefit-badge">🎁 零成本体验机会</div>
+                    <div class="benefit-badge">📈 1对1专业指导</div>
+                </div>
+            </div>
+
+            <!-- 常见问题 -->
+            <div class="faq">
+                <h2>❓ 常见问题</h2>
+                <div class="faq-item">
+                    <div class="faq-question">Q: 需要投入多少资金？</div>
+                    <div class="faq-answer">A: 新人完全零投入！我们先送您$100 USDT真实资金体验，满意后再考虑是否继续。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Q: 资金安全吗？</div>
+                    <div class="faq-answer">A: 100%安全！使用全球排名前10的交易所钱包，私钥完全由您自己掌控，我们无法触碰您的资金。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Q: 真的能赚钱吗？</div>
+                    <div class="faq-answer">A: 我们接入的是顶级机构的量化套利系统，通过自动化交易获取稳定收益，日化2-5%是保守估算。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Q: 我是小白，能操作吗？</div>
+                    <div class="faq-answer">A: 完全可以！我们提供1对1专业指导，全程协助您完成每一步操作，非常简单。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA 行动号召 -->
+        <div class="cta-section pulse">
+            <div class="cta-title">🚀 立即开始赚钱</div>
+            <div class="cta-desc">仅限前50名，先到先得！</div>
+            
+            <!-- 倒计时 -->
+            <div class="countdown">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">23</div>
+                    <div class="countdown-label">小时</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">59</div>
+                    <div class="countdown-label">分钟</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">59</div>
+                    <div class="countdown-label">秒</div>
+                </div>
+            </div>
+
+            <a href="https://t.me/YOUR_BOT_USERNAME" class="cta-button" target="_blank">
+                立即加入 Telegram
+            </a>
+
+            <div class="telegram-info">
+                或搜索 Telegram ID：
+                <div class="telegram-id">@YOUR_BOT_USERNAME</div>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <footer>
+            <p>⚠️ 投资有风险，入场需谨慎。本平台仅提供技术服务。</p>
+            <p style="margin-top: 10px; opacity: 0.7;">© 2025 Web3 Quantitative Arbitrage. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // 倒计时功能
+        function updateCountdown() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const diff = tomorrow - now;
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // 每秒更新倒计时
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // FAQ 点击展开效果
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.background = this.style.background === 'rgb(240, 242, 255)' ? '#f8f9ff' : '#f0f2ff';
+            });
+        });
+
+        // 页面加载动画
+        window.addEventListener('load', function() {
+            document.querySelectorAll('.feature-item').forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.animation = `fadeInUp 0.5s ease forwards`;
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+

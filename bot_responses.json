@@ -1,0 +1,43 @@
+{
+  "welcome": {
+    "zh": "🎉 欢迎使用Web3量化套利系统！\n\n请选择您的语言 / Please choose your language:",
+    "en": "🎉 Welcome to Web3 Quantitative Arbitrage System!\n\nPlease choose your language / 请选择您的语言:"
+  },
+  "language_set": {
+    "zh": "✅ 语言已设置为中文\n\n现在您可以开始了！",
+    "en": "✅ Language set to English\n\nYou can start now!"
+  },
+  "wallet_prompt": {
+    "zh": "📝 请提供您的 SOL 链钱包地址\n\n⚠️ 请确保地址正确，否则无法收到我们的转账！",
+    "en": "📝 Please provide your SOL wallet address\n\n⚠️ Make sure the address is correct, otherwise you won't receive our transfer!"
+  },
+  "invalid_address": {
+    "zh": "❌ 地址格式错误！\n\n请提供正确的 Solana (SOL) 链钱包地址，地址应该是32-44个字符的Base58编码字符串。\n\n⚠️ 错误的地址将无法收到我们的转账！",
+    "en": "❌ Invalid address format!\n\nPlease provide a valid Solana (SOL) wallet address. The address should be a Base58 encoded string of 32-44 characters.\n\n⚠️ Wrong address will not receive our transfer!"
+  },
+  "checking_address": {
+    "zh": "🔍 正在链上查询您的钱包地址信息...\n\n请稍候...",
+    "en": "🔍 Checking your wallet address on-chain...\n\nPlease wait..."
+  },
+  "address_info": {
+    "zh": "✅ 地址验证成功！\n\n📊 钱包详情：\n💰 余额：{balance} SOL\n🔗 地址：{address}\n✅ 状态：活跃\n\n请继续下一步操作。",
+    "en": "✅ Address verified successfully!\n\n📊 Wallet Details:\n💰 Balance: {balance} SOL\n🔗 Address: {address}\n✅ Status: Active\n\nPlease proceed to the next step."
+  },
+  "deposit_prompt": {
+    "zh": "💵 请存入资金到您的钱包\n\n存入完成后，请回复：已存入",
+    "en": "💵 Please deposit funds to your wallet\n\nAfter deposit, reply: Deposited"
+  },
+  "checking_deposit": {
+    "zh": "🔍 正在链上查询您的存款情况...\n\n请稍候...",
+    "en": "🔍 Checking your deposit on-chain...\n\nPlease wait..."
+  },
+  "deposit_confirmed": {
+    "zh": "✅ 存款确认成功！\n\n📊 存款详情：\n💰 金额：{amount} USDT\n🔗 交易哈希：{tx_hash}\n⏰ 时间：{timestamp}\n\n管理员已收到通知。",
+    "en": "✅ Deposit confirmed!\n\n📊 Deposit Details:\n💰 Amount: {amount} USDT\n🔗 Transaction Hash: {tx_hash}\n⏰ Time: {timestamp}\n\nAdmin has been notified."
+  },
+  "no_deposit_found": {
+    "zh": "⚠️ 未检测到存款\n\n请确认您已完成转账，并等待区块确认后再试。",
+    "en": "⚠️ No deposit detected\n\nPlease confirm you have completed the transfer and wait for block confirmation."
+  }
+}
+

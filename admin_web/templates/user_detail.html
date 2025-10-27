@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}用户详情 - Bot管理后台{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">用户详情 #{{ user_id }}</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">📋 基本信息</div>
+            <div class="card-body">
+                <p><strong>用户ID:</strong> {{ user_id }}</p>
+                <p><strong>语言:</strong> {{ user_data.get('language', 'N/A') }}</p>
+                <p><strong>状态:</strong> <span class="badge bg-info">{{ user_data.get('state', 'unknown') }}</span></p>
+                <p><strong>转账完成:</strong> 
+                    {% if user_data.get('transfer_completed') %}
+                    <span class="badge bg-success">是</span>
+                    {% else %}
+                    <span class="badge bg-secondary">否</span>
+                    {% endif %}
+                </p>
+                
+                <hr>
+                <div class="mb-2">
+                    <label class="form-label"><strong>📝 备注</strong></label>
+                    <textarea id="noteInput" class="form-control" rows="3" placeholder="输入备注信息...">{{ user_data.get('note', '') }}</textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>💼 钱包地址</strong></label>
+                    <input type="text" id="walletInput" class="form-control" value="{{ user_data.get('wallet', '') }}" placeholder="钱包地址">
+                </div>
+                <button onclick="saveUser()" class="btn btn-primary">
+                    <i class="bi bi-save"></i> 保存修改
+                </button>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">💼 钱包信息</div>
+            <div class="card-body">
+                <p><strong>钱包地址:</strong></p>
+                <code>{{ user_data.get('wallet', 'N/A') }}</code>
+                
+                {% if user_data.get('wallet_info') %}
+                <hr>
+                <p><strong>钱包状态:</strong></p>
+                <p>余额: {{ "%.4f"|format(user_data.wallet_info.get('balance', 0)) }} SOL</p>
+                <p>账户状态: {{ user_data.wallet_info.get('status', 'N/A') }}</p>
+                <p>活跃: {% if user_data.wallet_info.get('is_active') %}✅ 是{% else %}❌ 否{% endif %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">💬 对话历史</div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                {% if user_data.get('history') %}
+                    {% for msg in user_data.history %}
+                    <div class="mb-2">
+                        <strong>{% if msg.role == 'user' %}👤 用户:{% else %}🤖 Bot:{% endif %}</strong>
+                        <div class="alert alert-light">
+                            {{ msg.content[:200] }}{% if msg.content|length > 200 %}...{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted">暂无对话历史</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <button onclick="sendMessage()" class="btn btn-success">
+        <i class="bi bi-send"></i> 发送消息
+    </button>
+    <a href="/users" class="btn btn-secondary">返回列表</a>
+</div>
+
+<script>
+function sendMessage() {
+    const message = prompt('输入要发送给用户的消息:');
+    if (message) {
+        // 跳转到推送页面，并预填充用户ID
+        window.location.href = `/push?target_type=selected&target_users={{ user_id }}&message=${encodeURIComponent(message)}`;
+    }
+}
+
+function saveUser() {
+    const note = document.getElementById('noteInput').value;
+    const wallet = document.getElementById('walletInput').value;
+    
+    fetch('/user/{{ user_id }}/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            note: note,
+            wallet: wallet
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ 保存成功！');
+            location.reload();
+        } else {
+            alert('❌ 保存失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('❌ 保存失败：' + error);
+    });
+}
+</script>
+{% endblock %}
+

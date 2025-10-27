@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}仪表盘 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">仪表盘</h1>
+    <p class="page-subtitle">系统概览和关键指标</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4 g-3">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card primary">
+            <div class="d-flex align-items-center mb-3">
+                <div class="stat-icon"><i class="fas fa-users fa-2x"></i></div>
+                <div class="ms-auto">
+                    <span class="stat-label">总用户数</span>
+                </div>
+            </div>
+            <div class="stat-value">{{ stats.total_users }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card success">
+            <div class="d-flex align-items-center mb-3">
+                <div class="stat-icon"><i class="fas fa-user-plus fa-2x"></i></div>
+                <div class="ms-auto">
+                    <span class="stat-label">今日新增</span>
+                </div>
+            </div>
+            <div class="stat-value">{{ stats.new_users_today }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card warning">
+            <div class="d-flex align-items-center mb-3">
+                <div class="stat-icon"><i class="fas fa-comments fa-2x"></i></div>
+                <div class="ms-auto">
+                    <span class="stat-label">待处理消息</span>
+                </div>
+            </div>
+            <div class="stat-value">{{ stats.pending_messages }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card info">
+            <div class="d-flex align-items-center mb-3">
+                <div class="stat-icon"><i class="fas fa-signal fa-2x"></i></div>
+                <div class="ms-auto">
+                    <span class="stat-label">活跃会话</span>
+                </div>
+            </div>
+            <div class="stat-value">{{ stats.active_sessions }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近用户 -->
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users"></i> 最近注册用户
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>语言</th>
+                        <th>状态</th>
+                        <th>注册时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.user_id }}</td>
+                        <td>{{ user.username or 'N/A' }}</td>
+                        <td>
+                            {% if user.language == 'zh' %}
+                                <span class="badge badge-success">中文</span>
+                            {% else %}
+                                <span class="badge badge-info">English</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">{{ user.state }}</span>
+                        </td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}推送结果 - Bot管理后台{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">推送结果</h2>
+
+{% if failed > 0 %}
+<div class="alert alert-warning">
+    <h4>⚠️ 部分推送成功</h4>
+    <p>成功发送: <strong>{{ count }}</strong> 条</p>
+    <p>发送失败: <strong>{{ failed }}</strong> 条</p>
+    <p>总计: <strong>{{ total }}</strong> 个用户</p>
+</div>
+{% else %}
+<div class="alert alert-success">
+    <h4>✅ 推送成功！</h4>
+    <p>已成功发送给 <strong>{{ count }}</strong> 个用户</p>
+</div>
+{% endif %}
+
+<div class="card mt-4">
+    <div class="card-header">📊 详细结果</div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>用户ID</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result.user_id }}</td>
+                    <td>
+                        {% if result.status == 'success' %}
+                        <span class="badge bg-success">✅ 成功</span>
+                        {% else %}
+                        <span class="badge bg-danger">❌ 失败</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="/push" class="btn btn-primary">继续推送</a>
+    <a href="/users" class="btn btn-secondary">返回用户列表</a>
+</div>
+{% endblock %}
+

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bot管理后台{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            /* 专业配色系统 */
+            --primary-color: #4F46E5;
+            --secondary-color: #7C3AED;
+            --accent-color: #EC4899;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            
+            /* 背景色 */
+            --bg-primary: #F9FAFB;
+            --bg-card: #FFFFFF;
+            --bg-sidebar: #1E293B;
+            
+            /* 文字色 */
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-tertiary: #9CA3AF;
+            
+            /* 边框色 */
+            --border-light: #F3F4F6;
+            --border-default: #E5E7EB;
+            --border-dark: #D1D5DB;
+            
+            /* 间距系统（8px基准） */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 48px;
+            
+            /* 字号系统（4px倍数） */
+            --text-xs: 12px;
+            --text-sm: 14px;
+            --text-base: 16px;
+            --text-lg: 18px;
+            --text-xl: 20px;
+            --text-2xl: 24px;
+            --text-3xl: 30px;
+        }
+
+        * {
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            color: white;
+            padding: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            width: 240px;
+        }
+
+        .sidebar h4 {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar nav {
+            padding: 15px 10px;
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 8px;
+            margin: 4px 0;
+            transition: all 0.15s ease;
+            font-weight: 500;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 0;
+            width: 3px;
+            background: var(--accent-color);
+            transition: height 0.2s ease;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding-left: 20px;
+        }
+
+        .sidebar a.active {
+            background: rgba(79,70,229,0.2);
+            color: white;
+        }
+
+        .sidebar a.active::before {
+            height: 80%;
+        }
+
+        .sidebar a i {
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+
+        .main-content {
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            border: 1px solid var(--border-default);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+
+        .card {
+            border: 1px solid var(--border-default);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table thead {
+            background: #F9FAFB;
+            border-bottom: 2px solid var(--border-default);
+        }
+
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-2 sidebar">
+                <h4 class="mb-4"><i class="bi bi-robot"></i> Bot管理</h4>
+                <nav>
+                    <a href="/dashboard" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
+                        <i class="bi bi-speedometer2"></i> 仪表盘
+                    </a>
+                    <a href="/users" {% if request.endpoint == 'users' %}class="active"{% endif %}>
+                        <i class="bi bi-people"></i> 用户管理
+                    </a>
+                    <a href="/analytics" {% if request.endpoint == 'analytics' %}class="active"{% endif %}>
+                        <i class="bi bi-graph-up"></i> 数据分析
+                    </a>
+                    <a href="/push" {% if request.endpoint == 'push' %}class="active"{% endif %}>
+                        <i class="bi bi-send"></i> 消息推送
+                    </a>
+                    <a href="/ad" {% if request.endpoint == 'ad' %}class="active"{% endif %}>
+                        <i class="bi bi-megaphone"></i> 广告管理
+                    </a>
+                    <a href="/stats" {% if request.endpoint == 'stats' %}class="active"{% endif %}>
+                        <i class="bi bi-graph-up"></i> 数据统计
+                    </a>
+                    <a href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> 退出登录
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="col-md-10 main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

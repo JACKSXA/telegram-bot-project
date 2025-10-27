@@ -1,0 +1,16 @@
+# Telegram Bot Token
+TELEGRAM_BOT_TOKEN=你的Telegram_Bot_Token
+
+# DeepSeek API (推荐使用)
+DEEPSEEK_API_KEY=你的DeepSeek_API密钥
+
+# 管理员群组ID（用于接收通知）
+# 格式：-100xxxxxxxxxx
+# 获取方法：
+# 1. 创建一个Telegram群组
+# 2. 将Bot添加到群组并设为管理员
+# 3. 发送任意消息到群组
+# 4. 访问 https://api.telegram.org/bot<你的BOT_TOKEN>/getUpdates
+# 5. 查看返回的JSON中 message.chat.id 字段
+ADMIN_GROUP_ID=-100xxxxxxxxxx
+

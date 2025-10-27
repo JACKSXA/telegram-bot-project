@@ -1,0 +1,7 @@
+python-telegram-bot>=21.0
+openai
+python-dotenv
+solana>=0.30.0
+solders>=0.18.0
+httpx
+base58

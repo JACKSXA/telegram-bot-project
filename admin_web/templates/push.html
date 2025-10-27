@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}消息推送 - Bot管理后台{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-send"></i> 消息推送</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" id="pushForm">
+                    <div class="mb-3">
+                        <label class="form-label">目标用户</label>
+                        <select name="target_type" id="target_type" class="form-select" onchange="updateTargetInfo()">
+                            <option value="all">全部用户 ({{ stats.all }})</option>
+                            <option value="waiting">等待客服的用户 ({{ stats.waiting }})</option>
+                            <option value="bound">已绑定的用户 ({{ stats.bound }})</option>
+                            <option value="selected">精确推送（指定用户ID）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="userSelect" style="display:none;">
+                        <label class="form-label">指定用户ID</label>
+                        <input type="text" name="target_users" class="form-control" placeholder="例如: 7897880011, 123456789">
+                        <small class="text-muted">多个用户ID用逗号分隔</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-edit"></i> 消息内容
+                        </label>
+                        <textarea name="message" class="form-control" rows="10" id="messageContent" required placeholder="输入要推送的消息内容...&#10;&#10;支持变量：&#10;{username} - 用户名&#10;{wallet} - 钱包地址&#10;{user_id} - 用户ID&#10;&#10;支持格式：&#10;&lt;b&gt;粗体&lt;/b&gt;&#10;&lt;i&gt;斜体&lt;/i&gt;&#10;&lt;code&gt;代码&lt;/code&gt;&#10;[链接](url)"></textarea>
+                        <small class="text-muted">支持HTML格式和Markdown格式</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">推送类型</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="push_type" id="typeText" value="text" checked>
+                            <label class="btn btn-outline-primary" for="typeText">
+                                <i class="fas fa-file-alt"></i> 纯文本
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="push_type" id="typeHTML" value="html">
+                            <label class="btn btn-outline-primary" for="typeHTML">
+                                <i class="fas fa-code"></i> HTML
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="push_type" id="typeMarkdown" value="markdown">
+                            <label class="btn btn-outline-primary" for="typeMarkdown">
+                                <i class="fab fa-markdown"></i> Markdown
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-info" onclick="previewMessage()">
+                            <i class="fas fa-eye"></i> 预览消息
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> 立即推送
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">📊 用户统计</div>
+            <div class="card-body">
+                <p><strong>总用户数:</strong> {{ stats.all }}</p>
+                <p><strong>等待客服:</strong> {{ stats.waiting }}</p>
+                <p><strong>已绑定:</strong> {{ stats.bound }}</p>
+                <p><strong>已完成充值:</strong> {{ stats.transfer_completed }}</p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">💡 使用提示</div>
+            <div class="card-body">
+                <small>
+                    <p><strong>变量替换：</strong></p>
+                    <ul>
+                        <li>{username} - 用户名</li>
+                        <li>{wallet} - 钱包地址</li>
+                        <li>{user_id} - 用户ID</li>
+                    </ul>
+                    <p><strong>推送对象：</strong></p>
+                    <ul>
+                        <li>全部用户 - 发送给所有人</li>
+                        <li>等待客服 - 刚收到$100的用户</li>
+                        <li>已绑定 - 已完成绑定的用户</li>
+                        <li>精确推送 - 指定用户ID</li>
+                    </ul>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateTargetInfo() {
+    const select = document.getElementById('target_type');
+    const userSelect = document.getElementById('userSelect');
+    
+    if (select.value === 'selected') {
+        userSelect.style.display = 'block';
+    } else {
+        userSelect.style.display = 'none';
+    }
+}
+
+function previewMessage() {
+    const content = document.getElementById('messageContent').value;
+    const pushType = document.querySelector('input[name="push_type"]:checked').value;
+    
+    if (!content.trim()) {
+        alert('请输入消息内容');
+        return;
+    }
+    
+    // 创建预览模态框
+    const modal = document.createElement('div');
+    modal.className = 'modal fade show';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye"></i> 消息预览
+                    </h5>
+                    <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-body">
+                            <strong>推送类型：</strong> ${pushType.toUpperCase()}
+                            <hr>
+                            <div id="previewContent" style="white-space: pre-wrap;">${escapeHtml(content)}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">关闭</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+</script>
+{% endblock %}
+

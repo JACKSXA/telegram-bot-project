@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}用户管理 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">用户管理</h1>
+    <p class="page-subtitle">管理所有机器人用户</p>
+</div>
+
+<!-- 搜索栏 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="搜索用户ID或钱包地址...">
+            <button class="btn btn-primary" onclick="filterTable()">
+                <i class="fas fa-search"></i> 搜索
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 用户列表 -->
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-list"></i> 用户列表
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>地区</th>
+                        <th>语言</th>
+                        <th>钱包</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr data-userid="{{ user.user_id }}" data-wallet="{{ user.wallet or '' }}">
+                        <td><code>{{ user.user_id }}</code></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-2">
+                                    <div class="avatar-circle">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <span>{{ user.username or 'N/A' }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% set ip_info = user.ip_info|from_json if user.ip_info else {} %}
+                            <span class="region-badge">{{ ip_info.get('region', '🌍 未知') }}</span>
+                        </td>
+                        <td>
+                            {% if user.language == 'zh' %}
+                                <span class="badge badge-success">中文</span>
+                            {% else %}
+                                <span class="badge badge-info">English</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.wallet %}
+                                <code style="font-size: 12px;">{{ user.wallet[:20] }}...</code>
+                            {% else %}
+                                <span class="badge badge-secondary">未绑定</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">{{ user.state }}</span>
+                        </td>
+                        <td>
+                            <a href="/user/{{ user.user_id }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> 查看
+                            </a>
+                            <button class="btn btn-sm btn-success" onclick="quickPush('{{ user.user_id }}')">
+                                <i class="fas fa-paper-plane"></i> 推送
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.querySelector('table tbody');
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const userid = row.getAttribute('data-userid');
+        const wallet = row.getAttribute('data-wallet');
+        const text = (userid + ' ' + wallet).toLowerCase();
+        
+        if (text.includes(filter)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function quickPush(userId) {
+    window.location.href = '/push?target_users=' + userId;
+}
+</script>
+{% endblock %}

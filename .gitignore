@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+user_data.db*
+backups/
+
+# Logs
+*.log
+*.log.*
+
+# Environment
+.env
+env_config.txt
+*.env
+
+# Sessions
+user_sessions.json
+flask_session/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Netlify
+netlify_deploy/
+
+# Test files
+test_*.py
+*bot.log
+*flask.log
+
