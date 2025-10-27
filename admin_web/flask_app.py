@@ -29,12 +29,30 @@ load_dotenv()
 
 # 导入数据库管理器
 try:
+    # 设置数据库文件路径为项目根目录
+    import database_manager
+    # 保存原始构造函数
+    original_init = database_manager.DatabaseManager.__init__
+    
+    # 重新定义构造函数，使用项目根目录的数据库
+    def new_init(self, db_path=None):
+        if db_path is None:
+            # 使用项目根目录的数据库文件
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            db_path = os.path.join(project_root, 'user_data.db')
+        original_init(self, db_path)
+    
+    # 替换构造函数
+    database_manager.DatabaseManager.__init__ = new_init
+    
     from database_manager import get_database
     db = get_database()
     logger = logging.getLogger(__name__)
     logger.info("✅ 数据库管理器导入成功")
 except Exception as e:
     print(f"❌ 数据库管理器导入失败: {e}")
+    import traceback
+    traceback.print_exc()
     # 创建一个假数据库对象
     class FakeDB:
         def get_all_users(self): return []
