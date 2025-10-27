@@ -94,37 +94,77 @@ class DatabaseManager:
             )
         """
         
-        conversations_table = """
-            CREATE TABLE IF NOT EXISTS conversations (
-                id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL,
-                role TEXT NOT NULL,
-                content TEXT NOT NULL,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
-            )
-        """
-        
-        wallet_info_table = """
-            CREATE TABLE IF NOT EXISTS wallet_info (
-                id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL,
-                wallet_address TEXT,
-                balance DOUBLE PRECISION DEFAULT 0,
-                previous_balance DOUBLE PRECISION DEFAULT 0,
-                status TEXT,
-                is_active INTEGER DEFAULT 1,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(user_id),
-                UNIQUE(user_id)
-            )
-        """
+        # 尝试添加可能缺失的列（SQLite）
+        if not USE_POSTGRES:
+            try:
+                conn, cursor = self._get_cursor()
+                # 检查列是否存在
+                cursor.execute("PRAGMA table_info(users)")
+                columns = [row[1] for row in cursor.fetchall()]
+                
+                if 'avatar_url' not in columns:
+                    cursor.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT")
+                    print("✅ 添加了avatar_url列")
+                if 'ip_info' not in columns:
+                    cursor.execute("ALTER TABLE users ADD COLUMN ip_info TEXT")
+                    print("✅ 添加了ip_info列")
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                print(f"添加列失败（可能已存在）: {e}")
         
         # 对于SQLite，需要调整语法
-        if not USE_POSTGRES:
-            users_table = users_table.replace('BIGINT', 'INTEGER').replace('SERIAL', 'INTEGER PRIMARY KEY AUTOINCREMENT')
-            conversations_table = conversations_table.replace('SERIAL', 'INTEGER PRIMARY KEY AUTOINCREMENT').replace('BIGINT', 'INTEGER')
-            wallet_info_table = wallet_info_table.replace('SERIAL', 'INTEGER PRIMARY KEY AUTOINCREMENT').replace('BIGINT', 'INTEGER').replace('DOUBLE PRECISION', 'REAL')
+        if USE_POSTGRES:
+            conversations_table = """
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id)
+                )
+            """
+            
+            wallet_info_table = """
+                CREATE TABLE IF NOT EXISTS wallet_info (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    wallet_address TEXT,
+                    balance DOUBLE PRECISION DEFAULT 0,
+                    previous_balance DOUBLE PRECISION DEFAULT 0,
+                    status TEXT,
+                    is_active INTEGER DEFAULT 1,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id),
+                    UNIQUE(user_id)
+                )
+            """
+        else:
+            conversations_table = """
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+            
+            wallet_info_table = """
+                CREATE TABLE IF NOT EXISTS wallet_info (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL UNIQUE,
+                    wallet_address TEXT,
+                    balance REAL DEFAULT 0,
+                    previous_balance REAL DEFAULT 0,
+                    status TEXT,
+                    is_active INTEGER DEFAULT 1,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+            
+            users_table = users_table.replace('BIGINT', 'INTEGER')
         
         try:
             self._execute(users_table)
