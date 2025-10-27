@@ -1,0 +1,12 @@
+{
+  "message": "[stage-0 6/9] RUN --mount=type=cache,id=s/a2cfd9d1-4661-4e71-a748-89defa41c9c1-/root/cache/pip,target=/root/.cache/pip pip install --upgrade pip",
+  "timestamp": "2025-10-27T19:20:08.730092594Z",
+  "children": [
+    {
+      "message": "/bin/bash: line 1: pip: command not found\n",
+      "timestamp": "2025-10-27T19:20:42.778480272Z"
+    }
+  ]
+}{
+  "agentCanUpdateSnapshot": true
+}

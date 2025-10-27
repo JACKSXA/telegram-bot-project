@@ -52,7 +52,24 @@
 
 #### 渐变表头
 - 紫→蓝渐变背景
-- 白色文字
+- 白色文字{
+  "message": "[stage-0 4/9] RUN nix-env -if .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix && nix-collect-garbage -d",
+  "timestamp": "2025-10-27T19:27:27.108782393Z",
+  "children": [
+    {
+      "message": "unpacking 'https://github.com/NixOS/nixpkgs/archive/bc8f8d1be58e8c8383e683a06e1e1e57893fff87.tar.gz' into the Git cache...\n",
+      "timestamp": "2025-10-27T19:27:27.321487401Z"
+    },
+    {
+      "message": "installing 'bc8f8d1be58e8c8383e683a06e1e1e57893fff87-env'\n",
+      "timestamp": "2025-10-27T19:27:59.61813677Z"
+    },
+    {
+      "message": "error:\n       … while calling the 'derivationStrict' builtin\n         at <nix/derivation-internal.nix>:37:12:\n           36|\n           37|   strict = derivationStrict drvAttrs;\n             |            ^\n           38|\n\n       … while evaluating derivation 'bc8f8d1be58e8c8383e683a06e1e1e57893fff87-env'\n         whose name attribute is located at /nix/store/yfvhrcz7h68gxk06hfgq78din42454ha-source/pkgs/stdenv/generic/make-derivation.nix:336:7\n\n       … while evaluating attribute 'passAsFile' of derivation 'bc8f8d1be58e8c8383e683a06e1e1e57893fff87-env'\n         at /nix/store/yfvhrcz7h68gxk06hfgq78din42454ha-source/pkgs/build-support/trivial-builders/default.nix:60:9:\n           59|         inherit buildCommand name;\n           60|         passAsFile = [ \"buildCommand\" ]\n             |         ^\n           61|           ++ (derivationArgs.passAsFile or [ ]);\n\n       (stack trace truncated; use '--show-trace' to show the full, detailed trace)\n\n       error: undefined variable 'pip'\n       at /app/.nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix:19:9:\n           18|         '')\n           19|         pip python311\n             |         ^\n           20|       ];\n",
+      "timestamp": "2025-10-27T19:27:59.801947089Z"
+    }
+  ]
+}
 - 大写标题
 - 圆角设计
 
