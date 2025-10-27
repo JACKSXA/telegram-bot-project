@@ -34,12 +34,12 @@ try:
     # 保存原始构造函数
     original_init = database_manager.DatabaseManager.__init__
     
-    # 重新定义构造函数，使用项目根目录的数据库
+    # 重新定义构造函数，使用admin_web目录的数据库
     def new_init(self, db_path=None):
         if db_path is None:
-            # 使用项目根目录的数据库文件
-            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            db_path = os.path.join(project_root, 'user_data.db')
+            # 使用admin_web目录的数据库文件
+            admin_web_dir = os.path.dirname(os.path.abspath(__file__))
+            db_path = os.path.join(admin_web_dir, 'user_data.db')
             print(f"📁 使用数据库路径: {db_path}")
         original_init(self, db_path)
     
