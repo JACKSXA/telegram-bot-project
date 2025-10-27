@@ -342,7 +342,7 @@ def get_response(key: str, lang: str, **kwargs) -> str:
 
 def get_user_language(user_id: int) -> str:
     """获取用户语言偏好"""
-    return user_sessions.get(user_id, {}).get('language', 'en')
+    return user_sessions.get(user_id, {}).get('language', 'zh')
 
 def set_user_language(user_id: int, lang: str):
     """设置用户语言"""

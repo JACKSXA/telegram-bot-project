@@ -71,7 +71,9 @@ def load_sessions():
                 'last_name': user_data.get('last_name'),
                 'wallet': user_data.get('wallet'),
                 'note': user_data.get('note'),
-                'transfer_completed': bool(user_data.get('transfer_completed', 0))
+                'transfer_completed': bool(user_data.get('transfer_completed', 0)),
+                'avatar_url': user_data.get('avatar_url'),
+                'ip_info': user_data.get('ip_info')
             }
         
         return sessions
