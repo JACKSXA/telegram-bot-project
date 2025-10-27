@@ -40,6 +40,7 @@ try:
             # 使用项目根目录的数据库文件
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             db_path = os.path.join(project_root, 'user_data.db')
+            print(f"📁 使用数据库路径: {db_path}")
         original_init(self, db_path)
     
     # 替换构造函数
