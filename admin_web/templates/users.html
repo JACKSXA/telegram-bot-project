@@ -46,9 +46,13 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar me-2">
-                                    <div class="avatar-circle">
-                                        <i class="fas fa-user"></i>
-                                    </div>
+                                    {% if user.avatar_url %}
+                                        <img src="{{ user.avatar_url }}" alt="Avatar" class="avatar-circle" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="avatar-circle">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <span>{{ user.username or 'N/A' }}</span>
                             </div>
