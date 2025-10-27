@@ -27,8 +27,11 @@ wheels/
 *.db
 *.sqlite
 *.sqlite3
-user_data.db*
+user_data.db
 backups/
+
+# 但允许admin_web的数据库文件（用于Render部署）
+!admin_web/user_data.db
 
 # Logs
 *.log
