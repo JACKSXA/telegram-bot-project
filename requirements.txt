@@ -5,3 +5,6 @@ solana>=0.30.0
 solders>=0.18.0
 httpx
 base58
+Flask==3.0.0
+Flask-Session==0.5.0
+requests==2.31.0
