@@ -85,6 +85,9 @@
                             <button class="btn btn-sm btn-success" onclick="quickPush('{{ user.user_id }}')">
                                 <i class="fas fa-paper-plane"></i> 推送
                             </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('{{ user.user_id }}')">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -116,6 +119,31 @@ function filterTable() {
 
 function quickPush(userId) {
     window.location.href = '/push?target_users=' + userId;
+}
+
+function deleteUser(userId) {
+    if (!confirm('确定要删除这个用户吗？此操作不可恢复！')) {
+        return;
+    }
+    
+    fetch(`/user/${userId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('用户已删除');
+            location.reload(); // 刷新页面
+        } else {
+            alert('删除失败: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('删除失败: ' + error);
+    });
 }
 </script>
 {% endblock %}

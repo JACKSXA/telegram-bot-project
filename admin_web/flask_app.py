@@ -293,6 +293,33 @@ def users():
     
     return render_template('users.html', users=users_list)
 
+@app.route('/user/<int:user_id>/delete', methods=['POST'])
+def delete_user(user_id):
+    """删除用户"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    try:
+        # 使用database_manager的_execute方法删除用户
+        db._execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        
+        # 同时删除相关的对话记录
+        try:
+            db._execute("DELETE FROM conversations WHERE user_id = ?", (user_id,))
+        except:
+            pass  # 如果表不存在或删除失败，继续
+        
+        # 删除钱包信息
+        try:
+            db._execute("DELETE FROM wallet_info WHERE user_id = ?", (user_id,))
+        except:
+            pass  # 如果表不存在或删除失败，继续
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"删除用户失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/user/<int:user_id>')
 def user_detail(user_id):
     """用户详情"""
