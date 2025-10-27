@@ -243,13 +243,15 @@ def users():
     
     for user_id, data in sessions.items():
         users_list.append({
-            'user_id': user_id,  # 改为user_id保持一致
+            'user_id': user_id,
             'username': data.get('username', 'N/A'),
             'wallet': data.get('wallet', ''),
             'note': data.get('note', ''),
             'state': data.get('state', 'unknown'),
             'language': data.get('language', 'zh'),
-            'transfer_completed': data.get('transfer_completed', False)
+            'transfer_completed': data.get('transfer_completed', False),
+            'avatar_url': data.get('avatar_url'),
+            'ip_info': data.get('ip_info')
         })
     
     return render_template('users.html', users=users_list)
