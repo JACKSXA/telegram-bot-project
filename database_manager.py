@@ -34,12 +34,20 @@ class DatabaseManager:
     def _connect(self):
         """连接到数据库"""
         if USE_POSTGRES:
-            self.conn = psycopg2.connect(DATABASE_URL)
-            self.cursor = self.conn.cursor()
+            try:
+                print(f"🔗 尝试连接到PostgreSQL...")
+                self.conn = psycopg2.connect(DATABASE_URL)
+                self.cursor = self.conn.cursor()
+                print(f"✅ PostgreSQL连接成功")
+            except Exception as e:
+                print(f"❌ PostgreSQL连接失败: {e}")
+                print(f"DATABASE_URL: {DATABASE_URL}")
+                raise
         else:
             # 使用传入的路径或默认路径
             if not hasattr(self, 'db_path'):
                 self.db_path = 'user_data.db'
+            print(f"📁 使用SQLite数据库: {self.db_path}")
     
     def _get_cursor(self):
         """获取游标"""
