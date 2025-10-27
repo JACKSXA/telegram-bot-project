@@ -505,9 +505,39 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理 /start 命令"""
     user_id = update.effective_user.id
     
-    # 清除该用户的所有会话数据
-    if user_id in user_sessions:
-        del user_sessions[user_id]
+    # 立即保存新用户信息到数据库
+    try:
+        user_data = {
+            'username': update.effective_user.username,
+            'first_name': update.effective_user.first_name,
+            'last_name': update.effective_user.last_name,
+            'language': 'zh',  # 默认中文
+            'state': 'init',  # 初始状态
+            'wallet': None,
+            'note': '',
+            'transfer_completed': False,
+            'avatar_url': await get_user_avatar_url(update, context),
+            'ip_info': json.dumps({
+                'region': get_region_from_language_code(update.effective_user.language_code),
+                'language_code': update.effective_user.language_code,
+                'is_premium': update.effective_user.is_premium
+            })
+        }
+        db.save_user(user_id, user_data)
+        logger.info(f"✅ 已保存新用户 {user_id} 到数据库")
+    except Exception as e:
+        logger.error(f"保存用户信息失败: {e}")
+    
+    # 初始化会话
+    if user_id not in user_sessions:
+        user_sessions[user_id] = {
+            'username': update.effective_user.username,
+            'first_name': update.effective_user.first_name,
+            'last_name': update.effective_user.last_name,
+            'language': 'zh',
+            'state': 'init',
+            'history': []
+        }
     
     # 创建语言选择键盘
     keyboard = [
