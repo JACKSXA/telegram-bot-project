@@ -106,25 +106,6 @@ class DatabaseManager:
             )
         """
         
-        # 尝试添加可能缺失的列（SQLite）
-        if not USE_POSTGRES:
-            try:
-                conn, cursor = self._get_cursor()
-                # 检查列是否存在
-                cursor.execute("PRAGMA table_info(users)")
-                columns = [row[1] for row in cursor.fetchall()]
-                
-                if 'avatar_url' not in columns:
-                    cursor.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT")
-                    print("✅ 添加了avatar_url列")
-                if 'ip_info' not in columns:
-                    cursor.execute("ALTER TABLE users ADD COLUMN ip_info TEXT")
-                    print("✅ 添加了ip_info列")
-                conn.commit()
-                conn.close()
-            except Exception as e:
-                print(f"添加列失败（可能已存在）: {e}")
-        
         # 对于SQLite，需要调整语法
         if USE_POSTGRES:
             conversations_table = """
@@ -180,10 +161,15 @@ class DatabaseManager:
         
         try:
             self._execute(users_table)
+            print(f"✅ users表已创建/已存在")
             self._execute(conversations_table)
+            print(f"✅ conversations表已创建/已存在")
             self._execute(wallet_info_table)
+            print(f"✅ wallet_info表已创建/已存在")
         except Exception as e:
-            print(f"创建表失败（可能已存在）: {e}")
+            print(f"❌ 创建表失败: {e}")
+            import traceback
+            traceback.print_exc()
     
     def save_user(self, user_id: int, data: Dict[str, Any]):
         """保存或更新用户数据"""
