@@ -69,6 +69,13 @@ app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
+# 初始化数据库（启动时执行）
+try:
+    users = db.get_all_users()
+    logger.info(f"✅ 数据库已加载，当前有 {len(users)} 个用户")
+except Exception as e:
+    logger.error(f"❌ 数据库加载失败: {e}")
+
 # 配置
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
