@@ -279,16 +279,26 @@ class DatabaseManager:
     def get_conversations(self, user_id: int, limit: int = 100) -> list:
         """获取用户对话历史"""
         try:
-            # 统一按时间升序（旧->新），使新消息显示在底部
-            query = "SELECT role, content, timestamp FROM conversations WHERE user_id = %s ORDER BY timestamp ASC LIMIT %s"
+            # 取最新limit条，再按时间升序（旧->新），确保能看到最新消息
+            query = (
+                "SELECT role, content, timestamp FROM ("
+                " SELECT role, content, timestamp FROM conversations"
+                " WHERE user_id = %s ORDER BY timestamp DESC LIMIT %s"
+                ") t ORDER BY timestamp ASC"
+            )
             if USE_POSTGRES:
                 cursor = self._get_cursor()
                 cursor.execute(query, (user_id, limit))
                 return [dict(row) for row in cursor.fetchall()]
             else:
                 conn, cursor = self._get_cursor()
-                cursor.execute("SELECT role, content, timestamp FROM conversations WHERE user_id = ? ORDER BY timestamp ASC LIMIT ?",
-                             (user_id, limit))
+                cursor.execute(
+                    "SELECT role, content, timestamp FROM ("
+                    " SELECT role, content, timestamp FROM conversations"
+                    " WHERE user_id = ? ORDER BY timestamp DESC LIMIT ?"
+                    ") t ORDER BY timestamp ASC",
+                    (user_id, limit)
+                )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception as e:
             print(f"获取对话历史失败: {e}")

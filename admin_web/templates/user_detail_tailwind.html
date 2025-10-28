@@ -336,6 +336,8 @@ function saveUser() {
 <script>
 // 定时轮询刷新历史（每5秒）
 let lastRenderedCount = {{ user_data.get('history', [])|length }};
+// 页面加载后立即拉一次，避免等待首个5秒
+refreshHistory();
 async function refreshHistory() {
     try {
         const res = await fetch('/user/{{ user_id }}/history');
