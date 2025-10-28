@@ -211,6 +211,97 @@
             </div>
         </div>
     </div>
+
+    <!-- Channel Analysis -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 mb-6">
+        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-chart-pie mr-2"></i> 按渠道统计
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="channelContainer">
+                <div class="flex items-center justify-center py-8">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-3"></i>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">加载渠道数据中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// 加载渠道统计
+async function loadChannelData() {
+    try {
+        const response = await fetch('/api/funnel-by-channel');
+        const data = await response.json();
+        
+        if (data.success && data.channels && data.channels.length > 0) {
+            const container = document.getElementById('channelContainer');
+            let html = '<div class="space-y-4">';
+            
+            data.channels.forEach(channel => {
+                const total = channel.total || 0;
+                const walletRate = total > 0 ? ((channel.wallet_bound || 0) / total * 100).toFixed(1) : 0;
+                const boundRate = total > 0 ? ((channel.bound_ready || 0) / total * 100).toFixed(1) : 0;
+                const transferRate = total > 0 ? ((channel.transfer_completed || 0) / total * 100).toFixed(1) : 0;
+                
+                html += `
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold text-gray-900 dark:text-white">${channel.channel || '未知渠道'}</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">(${total} 用户)</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">💰 钱包绑定</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: ${walletRate}%"></div>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white w-12 text-right">${walletRate}%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">🤝 客服绑定</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: ${boundRate}%"></div>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white w-12 text-right">${boundRate}%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">✅ 转账完成</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-purple-500 h-2 rounded-full" style="width: ${transferRate}%"></div>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white w-12 text-right">${transferRate}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            document.getElementById('channelContainer').innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">暂无渠道数据</p>';
+        }
+    } catch (error) {
+        document.getElementById('channelContainer').innerHTML = '<p class="text-center text-red-500 py-8">加载渠道数据失败</p>';
+    }
+}
+
+// 页面加载时获取渠道数据
+loadChannelData();
+</script>
 {% endblock %}
 

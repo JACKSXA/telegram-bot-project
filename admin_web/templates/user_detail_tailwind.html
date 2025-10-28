@@ -59,6 +59,25 @@
                 </div>
             </div>
 
+            <!-- RFM Score -->
+            <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+                <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-chart-line mr-2"></i> RFM指标
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div id="rfmContainer">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="text-center">
+                                <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-3"></i>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">加载RFM指标中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Wallet Info -->
             <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
                 <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
@@ -449,6 +468,55 @@ async function refreshHistory(force = false) {
     } catch (e) {}
 }
 setInterval(refreshHistory, 5000);
+
+// 加载RFM指标
+async function loadRFM() {
+    try {
+        const response = await fetch(`/api/users/{{ user_id }}/rfm`);
+        const data = await response.json();
+        
+        if (data.success && data.rfm) {
+            const rfm = data.rfm;
+            const container = document.getElementById('rfmContainer');
+            
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center p-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-800 dark:text-blue-100">${rfm.recency}</div>
+                            <div class="text-sm font-medium text-blue-600 dark:text-blue-300 mt-1">活跃度</div>
+                            <div class="text-xs text-blue-500 dark:text-blue-400 mt-1">Recency</div>
+                        </div>
+                        <div class="text-center p-4 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-lg">
+                            <div class="text-3xl font-bold text-green-800 dark:text-green-100">${rfm.frequency}</div>
+                            <div class="text-sm font-medium text-green-600 dark:text-green-300 mt-1">互动频率</div>
+                            <div class="text-xs text-green-500 dark:text-green-400 mt-1">Frequency</div>
+                        </div>
+                        <div class="text-center p-4 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-800 dark:text-purple-100">${rfm.monetary}</div>
+                            <div class="text-sm font-medium text-purple-600 dark:text-purple-300 mt-1">价值</div>
+                            <div class="text-xs text-purple-500 dark:text-purple-400 mt-1">Monetary</div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">综合评分</span>
+                            <span class="text-2xl font-bold text-gray-900 dark:text-white font-mono">${rfm.rfm_total}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">RFM评分范围: 111 - 555 (越高越好)</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            document.getElementById('rfmContainer').innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">暂无RFM数据</p>';
+        }
+    } catch (error) {
+        document.getElementById('rfmContainer').innerHTML = '<p class="text-center text-red-500 py-8">加载RFM数据失败</p>';
+    }
+}
+
+// 页面加载时获取RFM指标
+loadRFM();
 </script>
 {% endblock %}
 
