@@ -134,22 +134,34 @@
                         <i class="fas fa-chart-bar mr-2"></i> 用户统计
                     </h3>
                 </div>
-                <div class="p-6 space-y-5">
-                    <div class="flex justify-between items-center">
-                        <span class="text-base text-gray-600 dark:text-gray-400">总用户数</span>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.all }}</span>
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-base font-semibold text-gray-700 dark:text-gray-300">总用户数</span>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.all }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-base text-gray-600 dark:text-gray-400">等待客服</span>
-                        <span class="text-xl font-bold text-yellow-600 dark:text-yellow-400">{{ stats.waiting }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">初始化</span>
+                        <span class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ stats.idle or 0 }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-base text-gray-600 dark:text-gray-400">已绑定</span>
-                        <span class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.bound }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">等待钱包</span>
+                        <span class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ stats.wallet_waiting or 0 }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-base text-gray-600 dark:text-gray-400">已完成充值</span>
-                        <span class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ stats.transfer_completed }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">已验证</span>
+                        <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ stats.verified or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">等待客服</span>
+                        <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">{{ stats.waiting or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">已绑定</span>
+                        <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ stats.bound or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">已完成充值</span>
+                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ stats.transfer_completed or 0 }}</span>
                     </div>
                 </div>
             </div>

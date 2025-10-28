@@ -589,12 +589,12 @@ def push():
         elif target_type == 'waiting':
             # 等待客服的用户
             for user_id, data in sessions.items():
-                if data.get('state') == 'waiting_customer_service':
+                if data.get('state') in ['waiting_customer_service', 'waiting']:
                     user_list.append(user_id)
         elif target_type == 'bound':
             # 已绑定的用户
             for user_id, data in sessions.items():
-                if data.get('state') == 'bound_and_ready':
+                if data.get('state') in ['bound_and_ready', 'bound', 'completed']:
                     user_list.append(user_id)
         
         # 如果没有用户，返回错误
@@ -659,9 +659,12 @@ def push():
     # 获取各个状态的用户数量
     stats = {
         'all': len(sessions),
-        'waiting': sum(1 for u in sessions.values() if u.get('state') == 'waiting_customer_service'),
-        'bound': sum(1 for u in sessions.values() if u.get('state') == 'bound_and_ready'),
-        'transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False))
+        'waiting': sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting']),
+        'bound': sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed']),
+        'transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False)),
+        'idle': sum(1 for u in sessions.values() if u.get('state') in ['idle', 'init']),
+        'verified': sum(1 for u in sessions.values() if u.get('state') in ['wallet_verified', 'verified']),
+        'wallet_waiting': sum(1 for u in sessions.values() if u.get('state') in ['waiting_wallet', 'wallet_waiting'])
     }
     
     return render_template('push_tailwind.html', stats=stats, users=sessions)
