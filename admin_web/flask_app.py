@@ -605,12 +605,17 @@ def push():
             personalized_msg = personalized_msg.replace('{wallet}', user_data.get('wallet', 'N/A'))
             personalized_msg = personalized_msg.replace('{user_id}', str(user_id))
             
-            if send_telegram_message(user_id, personalized_msg):
-                sent_count += 1
-                results.append({'user_id': user_id, 'status': 'success'})
-            else:
+            try:
+                if send_telegram_message(user_id, personalized_msg):
+                    sent_count += 1
+                    results.append({'user_id': user_id, 'status': 'success'})
+                else:
+                    failed_count += 1
+                    results.append({'user_id': user_id, 'status': 'failed'})
+            except Exception as e:
+                logger.error(f"发送消息给用户 {user_id} 失败: {e}")
                 failed_count += 1
-                results.append({'user_id': user_id, 'status': 'failed'})
+                results.append({'user_id': user_id, 'status': 'failed', 'error': str(e)})
         
         # 保存推送记录
         push_record = {

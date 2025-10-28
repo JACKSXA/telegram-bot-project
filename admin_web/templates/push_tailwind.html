@@ -199,12 +199,62 @@ function updateTargetInfo() {
 
 function previewMessage() {
     const message = document.getElementById('messageContent').value;
-    const content = message
-        .replace(/{username}/g, '示例用户')
-        .replace(/{wallet}/g, '0x1234...5678')
-        .replace(/{user_id}/g, '123456789');
+    if (!message.trim()) {
+        alert('请输入要预览的消息内容');
+        return;
+    }
     
-    alert('消息预览：\n\n' + content);
+    const content = message
+        .replace(/{username}/g, '<span class="text-blue-600 font-semibold">示例用户</span>')
+        .replace(/{wallet}/g, '<span class="text-green-600 font-mono">0x1234...5678</span>')
+        .replace(/{user_id}/g, '<span class="text-gray-600">123456789</span>');
+    
+    // 创建预览模态框
+    const modal = document.createElement('div');
+    modal.id = 'previewModal';
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center';
+    modal.innerHTML = `
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePreviewModal()"></div>
+        <div class="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                    <i class="fas fa-eye mr-2"></i> 消息预览
+                </h3>
+                <button onclick="closePreviewModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4 flex items-center space-x-2">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Bot 将发送</div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-lg p-4 border border-blue-200 dark:border-gray-600">
+                    <div class="text-gray-900 dark:text-white whitespace-pre-wrap">${content}</div>
+                </div>
+                <div class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-info-circle mr-1"></i> 变量 {username}, {wallet}, {user_id} 将被实际值替换
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                <button onclick="closePreviewModal()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    知道了
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function closePreviewModal() {
+    const modal = document.getElementById('previewModal');
+    if (modal) modal.remove();
 }
 </script>
 {% endblock %}
