@@ -859,6 +859,54 @@ def batch_delete():
     logger.info(f"批量删除: {deleted}/{len(user_ids)}个用户")
     return jsonify({'success': True, 'deleted': deleted})
 
+@app.route('/api/templates')
+def api_templates():
+    """获取模板列表"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        templates = db.get_templates(active_only=True)
+        return jsonify({'success': True, 'templates': templates})
+    except Exception as e:
+        logger.error(f"获取模板失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/templates', methods=['POST'])
+def api_save_template():
+    """保存新模板"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    name = data.get('name')
+    type_ = data.get('type')
+    content = data.get('content')
+    active = data.get('active', 1)
+    
+    if not all([name, type_, content]):
+        return jsonify({'success': False, 'error': 'Missing params'})
+    
+    try:
+        result = db.save_template(name, type_, content, active)
+        return jsonify({'success': result})
+    except Exception as e:
+        logger.error(f"保存模板失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/funnel-by-channel')
+def api_funnel_by_channel():
+    """按渠道统计漏斗"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        channel_data = db.get_funnel_by_channel()
+        return jsonify({'success': True, 'channels': channel_data})
+    except Exception as e:
+        logger.error(f"按渠道统计失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))

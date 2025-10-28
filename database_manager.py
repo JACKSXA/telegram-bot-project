@@ -27,6 +27,7 @@ class DatabaseManager:
         self.lock = threading.Lock()
         # 保存数据库路径
         self.db_path = db_path or 'user_data.db'
+        self.sqlite_conn = None  # SQLite连接缓存
         self._connect()
         self._create_tables()
     
@@ -47,12 +48,21 @@ class DatabaseManager:
             if not hasattr(self, 'db_path'):
                 self.db_path = 'user_data.db'
             print(f"📁 使用SQLite数据库: {self.db_path}")
+            # 对于内存数据库，创建连接缓存
+            if self.db_path == ':memory:':
+                self.sqlite_conn = sqlite3.connect(':memory:')
+                self.sqlite_conn.row_factory = sqlite3.Row
+                print(f"✅ SQLite内存数据库连接已缓存")
     
     def _get_cursor(self):
         """获取游标"""
         if USE_POSTGRES:
             return self.conn.cursor(cursor_factory=RealDictCursor)
         else:
+            # 对于内存数据库，复用缓存的连接
+            if self.db_path == ':memory:' and self.sqlite_conn:
+                return self.sqlite_conn, self.sqlite_conn.cursor()
+            # 文件数据库，每次创建新连接
             conn = sqlite3.connect(self.db_path)
             conn.row_factory = sqlite3.Row
             return conn, conn.cursor()
@@ -74,7 +84,11 @@ class DatabaseManager:
             else:
                 cursor.execute(query)
             conn.commit()
-            conn.close()
+            # 内存数据库不关闭连接，文件数据库才关闭
+            if self.db_path != ':memory:':
+                if self.db_path != ":memory:":
+
+                    conn.close()
             return cursor
     
     def _fetchall(self, cursor):
@@ -213,12 +227,24 @@ class DatabaseManager:
             # 扩展表
             try:
                 self._execute(templates_table)
+                print(f"✅ templates表已创建/已存在")
+            except Exception as e:
+                print(f"⚠️ templates表创建失败: {e}")
+            try:
                 self._execute(experiments_table)
+                print(f"✅ experiments表已创建/已存在")
+            except Exception as e:
+                print(f"⚠️ experiments表创建失败: {e}")
+            try:
                 self._execute(user_events_table)
+                print(f"✅ user_events表已创建/已存在")
+            except Exception as e:
+                print(f"⚠️ user_events表创建失败: {e}")
+            try:
                 self._execute(journeys_table)
-                print(f"✅ 扩展表已创建/已存在")
-            except Exception as _:
-                pass
+                print(f"✅ journeys表已创建/已存在")
+            except Exception as e:
+                print(f"⚠️ journeys表创建失败: {e}")
         except Exception as e:
             print(f"❌ 创建表失败: {e}")
             import traceback
@@ -264,8 +290,12 @@ class DatabaseManager:
                     cursor.close()
                 else:
                     # SQLite逻辑
-                    conn = sqlite3.connect(self.db_path)
-                    cursor = conn.cursor()
+                    if self.db_path == ':memory:' and self.sqlite_conn:
+                        conn = self.sqlite_conn
+                        cursor = conn.cursor()
+                    else:
+                        conn = sqlite3.connect(self.db_path)
+                        cursor = conn.cursor()
                     cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
                     exists = cursor.fetchone()
                     
@@ -292,7 +322,10 @@ class DatabaseManager:
                             user_info['updated_at']
                         ))
                     conn.commit()
-                    conn.close()
+                    if self.db_path != ':memory:':
+                        if self.db_path != ":memory:":
+
+                            conn.close()
                     
             except Exception as e:
                 print(f"保存用户失败: {e}")
@@ -326,7 +359,9 @@ class DatabaseManager:
                 cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
                              (int(user_id), str(role or ''), str(content or '')))
                 conn.commit()
-                conn.close()
+                if self.db_path != ":memory:":
+
+                    conn.close()
         except Exception as e:
             print(f"保存对话失败: {e}")
             import traceback
@@ -396,7 +431,9 @@ class DatabaseManager:
                 else:
                     cursor.execute("SELECT id, name, type, content, active, created_at FROM templates ORDER BY id DESC")
                 rows = [dict(row) for row in cursor.fetchall()]
-                conn.close()
+                if self.db_path != ":memory:":
+
+                    conn.close()
                 return rows
         except Exception as e:
             print(f"获取模板失败: {e}")
@@ -411,14 +448,17 @@ class DatabaseManager:
                 self.conn.commit()
                 return True
             else:
-                conn = sqlite3.connect(self.db_path)
-                cursor = conn.cursor()
+                conn, cursor = self._get_cursor()
                 cursor.execute("INSERT INTO templates (name, type, content, active) VALUES (?, ?, ?, ?)", (name, type_, content, active))
                 conn.commit()
-                conn.close()
+                if self.db_path != ":memory:":
+
+                    conn.close()
                 return True
         except Exception as e:
             print(f"保存模板失败: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     # ====== 渠道漏斗 ======
@@ -457,7 +497,9 @@ class DatabaseManager:
                     """
                 )
                 rows = [dict(row) for row in cursor.fetchall()]
-                conn.close()
+                if self.db_path != ":memory:":
+
+                    conn.close()
                 return rows
         except Exception as e:
             print(f"按渠道统计失败: {e}")
@@ -523,7 +565,9 @@ class DatabaseManager:
 
                 cursor.execute("SELECT COUNT(*) FROM users WHERE transfer_completed = 1")
                 transfer_completed = cursor.fetchone()[0]
-                conn.close()
+                if self.db_path != ":memory:":
+
+                    conn.close()
 
             # 转化率
             if total_users > 0:
