@@ -4,47 +4,19 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
+env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # Database
-*.db
-*.sqlite
-*.sqlite3
-user_data.db
-backups/
-
-# 但允许admin_web的数据库文件（用于Render部署）
-!admin_web/user_data.db
+*.db-journal
+*.db-wal
+*.db-shm
+sessions.pkl
 
 # Logs
+logs/
 *.log
-*.log.*
-
-# Environment
-.env
-env_config.txt
-*.env
-
-# Sessions
-user_sessions.json
-flask_session/
 
 # IDE
 .vscode/
@@ -57,14 +29,13 @@ flask_session/
 .DS_Store
 Thumbs.db
 
-# Netlify
-netlify_deploy/
+# Archives (保留历史文档)
+archive/*.md
 
-# Test files
-test_*.py
-*bot.log
-*flask.log
+# 测试文件（只忽略根目录）
+/test_*.py
+/test_*.md
 
-# Railway/Nixpacks
-.nixpacks/
-
+# 临时文件
+*.tmp
+*.bak

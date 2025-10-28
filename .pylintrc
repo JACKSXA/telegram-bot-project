@@ -1,0 +1,14 @@
+[MASTER]
+ignore=venv,env
+
+[MESSAGES CONTROL]
+disable=C0103,C0301,C0111,R0903,R0913
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
+
+[DESIGN]
+max-args=8
+max-branches=15
+max-statements=50
