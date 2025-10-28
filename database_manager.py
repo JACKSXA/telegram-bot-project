@@ -17,7 +17,6 @@ if DATABASE_URL and DATABASE_URL.startswith('postgresql://'):
     from psycopg2.extras import RealDictCursor
     USE_POSTGRES = True
 else:
-    # 使用SQLite
     import sqlite3
     USE_POSTGRES = False
 
