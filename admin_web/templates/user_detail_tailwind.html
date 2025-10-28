@@ -70,7 +70,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">钱包地址</label>
                         {% if user_data.get('wallet') %}
-                            <code class="block px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-base font-mono border border-gray-200 dark:border-gray-600 break-all">{{ user_data.get('wallet', 'N/A') }}</code>
+                            <code class="block px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-base font-mono border border-gray-200 dark:border-gray-600 break-all text-gray-900 dark:text-white">{{ user_data.get('wallet', 'N/A') }}</code>
                         {% else %}
                             <p class="text-gray-500 dark:text-gray-400">未绑定</p>
                         {% endif %}
@@ -132,12 +132,20 @@
                             class="block w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                     </div>
-                    <button 
-                        onclick="saveUser()"
-                        class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                    >
-                        <i class="fas fa-save mr-2"></i> 保存修改
-                    </button>
+                    <div class="flex gap-2">
+                        <button 
+                            onclick="saveUser()"
+                            class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                            <i class="fas fa-save mr-2"></i> 保存修改
+                        </button>
+                        <button 
+                            onclick="sendMessage()"
+                            class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                        >
+                            <i class="fas fa-paper-plane mr-2"></i> 发送消息
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,6 +196,42 @@
 </div>
 
 <script>
+function sendMessage() {
+    const message = prompt('输入要发送给用户的消息:');
+    if (message && message.trim()) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/push';
+        
+        const targetType = document.createElement('input');
+        targetType.type = 'hidden';
+        targetType.name = 'target_type';
+        targetType.value = 'selected';
+        form.appendChild(targetType);
+        
+        const targetUsers = document.createElement('input');
+        targetUsers.type = 'hidden';
+        targetUsers.name = 'target_users';
+        targetUsers.value = '{{ user_id }}';
+        form.appendChild(targetUsers);
+        
+        const msgInput = document.createElement('input');
+        msgInput.type = 'hidden';
+        msgInput.name = 'message';
+        msgInput.value = message;
+        form.appendChild(msgInput);
+        
+        const pushType = document.createElement('input');
+        pushType.type = 'hidden';
+        pushType.name = 'push_type';
+        pushType.value = 'text';
+        form.appendChild(pushType);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 function saveUser() {
     const note = document.getElementById('noteInput').value;
     const wallet = document.getElementById('walletInput').value;

@@ -287,20 +287,29 @@ def users():
     sessions = load_sessions()
     users_list = []
     
+    # 获取筛选条件
+    filter_state = request.args.get('state', '')
+    
     for user_id, data in sessions.items():
+        user_state = data.get('state', 'unknown')
+        
+        # 如果指定了状态筛选，只显示匹配的用户
+        if filter_state and user_state != filter_state:
+            continue
+            
         users_list.append({
             'user_id': user_id,
             'username': data.get('username', 'N/A'),
             'wallet': data.get('wallet', ''),
             'note': data.get('note', ''),
-            'state': data.get('state', 'unknown'),
+            'state': user_state,
             'language': data.get('language', 'zh'),
             'transfer_completed': data.get('transfer_completed', False),
             'avatar_url': data.get('avatar_url'),
             'ip_info': data.get('ip_info')
         })
     
-    return render_template('users_tailwind.html', users=users_list)
+    return render_template('users_tailwind.html', users=users_list, filter_state=filter_state)
 
 @app.route('/user/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):

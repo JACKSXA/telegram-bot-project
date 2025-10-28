@@ -42,12 +42,12 @@
                     onchange="filterTable()"
                     class="block w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
                 >
-                    <option value="">所有状态</option>
-                    <option value="idle" class="text-gray-900">空闲</option>
-                    <option value="waiting_wallet" class="text-gray-900">等待钱包</option>
-                    <option value="wallet_verified" class="text-gray-900">已验证</option>
-                    <option value="waiting_transfer" class="text-gray-900">等待转账</option>
-                    <option value="completed" class="text-gray-900">已完成</option>
+                    <option value="" {% if not filter_state %}selected{% endif %}>所有状态</option>
+                    <option value="idle" {% if filter_state == 'idle' %}selected{% endif %} class="text-gray-900">空闲</option>
+                    <option value="waiting_wallet" {% if filter_state == 'waiting_wallet' %}selected{% endif %} class="text-gray-900">等待钱包</option>
+                    <option value="wallet_verified" {% if filter_state == 'wallet_verified' %}selected{% endif %} class="text-gray-900">已验证</option>
+                    <option value="waiting_transfer" {% if filter_state == 'waiting_transfer' %}selected{% endif %} class="text-gray-900">等待转账</option>
+                    <option value="completed" {% if filter_state == 'completed' %}selected{% endif %} class="text-gray-900">已完成</option>
                 </select>
             </div>
         </div>
@@ -107,7 +107,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% if user.wallet %}
-                                <code class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-base font-mono font-medium border border-gray-200 dark:border-gray-600">{{ user.wallet[:20] }}...</code>
+                                <code class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-base font-mono font-medium border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white">{{ user.wallet[:20] }}...</code>
                             {% else %}
                                 <span class="text-base text-gray-400 dark:text-gray-500">未绑定</span>
                             {% endif %}

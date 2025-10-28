@@ -76,12 +76,16 @@
             </div>
             <div class="p-6">
                 <div class="space-y-4">
+                    {% set completed_count = data.state_distribution.get('completed', 0) %}
+                    {% set waiting_transfer_count = data.state_distribution.get('waiting_transfer', 0) %}
+                    {% set wallet_verified_count = data.state_distribution.get('wallet_verified', 0) %}
+                    {% set waiting_wallet_count = data.state_distribution.get('waiting_wallet', 0) %}
+                    
                     {% set steps = [
                         ('注册用户', data.total_users, 'blue'),
-                        ('创建钱包', data.state_distribution.get('wallet_verified', 0), 'green'),
-                        ('等待服务', data.state_distribution.get('waiting_customer_service', 0), 'yellow'),
-                        ('已绑定', data.state_distribution.get('bound_and_ready', 0), 'purple'),
-                        ('转账完成', data.state_distribution.get('transfer_completed', 0), 'pink')
+                        ('已绑定钱包', wallet_verified_count + waiting_transfer_count + completed_count, 'green'),
+                        ('等待转账', waiting_transfer_count, 'yellow'),
+                        ('转账完成', completed_count, 'pink')
                     ] %}
                     
                     {% for step in steps %}
@@ -115,7 +119,7 @@
             <div class="p-6">
                 <div class="space-y-3">
                     {% for state, count in data.state_distribution.items() %}
-                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/users?state={{ state }}" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                         <div class="flex items-center gap-3">
                             {% if state == 'waiting_customer_service' %}
                                 <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
@@ -129,9 +133,9 @@
                             {% elif state == 'waiting_transfer' %}
                                 <i class="fas fa-clock text-orange-600 dark:text-orange-400"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">等待转账</span>
-                            {% elif state == 'transfer_completed' %}
+                            {% elif state == 'completed' %}
                                 <i class="fas fa-check-double text-green-600 dark:text-green-400"></i>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">转账完成</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">已完成</span>
                             {% else %}
                                 <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ state }}</span>
@@ -140,7 +144,7 @@
                         <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             {{ count }}
                         </span>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
