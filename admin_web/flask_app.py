@@ -708,6 +708,14 @@ def push():
     
     return render_template('push_tailwind.html', stats=stats, users=valid_sessions)
 
+@app.route('/ab-test')
+def ab_test():
+    """A/B测试管理"""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template('ab_test_tailwind.html')
+
 @app.route('/ad', methods=['GET', 'POST'])
 def ad():
     """广告管理"""
@@ -907,9 +915,29 @@ def api_funnel_by_channel():
         logger.error(f"按渠道统计失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/experiments/<exp_key>', methods=['POST'])
+def api_create_experiment(exp_key):
+    """创建A/B测试实验（新版）"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    variant = data.get('variant')
+    weight = data.get('weight', 50)
+    
+    if not variant:
+        return jsonify({'success': False, 'error': 'Missing variant'})
+    
+    try:
+        result = db.create_experiment(exp_key, variant, weight)
+        return jsonify({'success': result})
+    except Exception as e:
+        logger.error(f"创建实验失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/api/experiments', methods=['POST'])
-def api_create_experiment():
-    """创建A/B测试实验"""
+def api_create_experiment_old():
+    """创建A/B测试实验（旧版兼容）"""
     if not session.get('logged_in'):
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
     

@@ -1,0 +1,126 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}A/B测试 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            <i class="fas fa-flask mr-2"></i> A/B测试管理
+        </h1>
+        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">创建和管理A/B测试实验</p>
+    </div>
+
+    <!-- Create Experiment Form -->
+    <div class="mb-8 rounded-[10px] bg-white shadow-md dark:bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-plus-circle mr-2"></i> 创建新实验
+        </h3>
+        <form id="createExperimentForm" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">实验名称</label>
+                <input type="text" id="expKey" required placeholder="如: welcome_msg"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">变体名称</label>
+                <input type="text" id="variant" required placeholder="如: control/treatment"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">权重(%)</label>
+                <input type="number" id="weight" value="50" min="1" max="100" required
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" 
+                    class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i> 创建
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Experiments List -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-list mr-2"></i> 实验列表
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="experimentsContainer">
+                <div class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-3"></i>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+// Toast通知
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `${isError ? 'bg-red-500' : 'bg-green-500'} text-white px-6 py-4 rounded-lg shadow-xl mb-4`;
+    toast.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// 创建实验
+document.getElementById('createExperimentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const expKey = document.getElementById('expKey').value;
+    const variant = document.getElementById('variant').value;
+    const weight = parseInt(document.getElementById('weight').value);
+    
+    try {
+        const response = await fetch(`/api/experiments/${expKey}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({variant, weight})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('实验创建成功！', false);
+            document.getElementById('createExperimentForm').reset();
+            loadExperiments();
+        } else {
+            showToast('创建失败：' + (data.error || '未知错误'), true);
+        }
+    } catch (error) {
+        showToast('创建失败：' + error, true);
+    }
+});
+
+// 加载实验列表
+async function loadExperiments() {
+    // 由于没有专门的列表API，这里展示提示
+    document.getElementById('experimentsContainer').innerHTML = `
+        <div class="text-center py-12">
+            <i class="fas fa-flask text-6xl text-gray-300 mb-4"></i>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">暂无实验数据</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500">创建实验后将在这里显示</p>
+        </div>
+    `;
+}
+
+// 页面加载时加载数据
+loadExperiments();
+</script>
+{% endblock %}
+
