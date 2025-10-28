@@ -3,13 +3,13 @@
 {% block title %}消息推送 - Bot管理后台{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-screen-2xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="mb-6">
+    <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
             <i class="fas fa-bullhorn mr-2"></i> 消息推送
         </h1>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">向用户发送消息通知</p>
+        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">向用户发送消息通知</p>
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -21,17 +21,17 @@
                         <i class="fas fa-paper-plane mr-2"></i> 推送设置
                     </h3>
                 </div>
-                <div class="p-6">
+                <div class="p-8">
                     <form method="POST" id="pushForm">
                         <!-- Target Users -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-8">
+                            <label class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                 <i class="fas fa-users mr-2"></i>目标用户
                             </label>
                             <select 
                                 name="target_type" 
                                 id="target_type" 
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                class="block w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 onchange="updateTargetInfo()"
                             >
                                 <option value="all">全部用户 ({{ stats.all }})</option>
@@ -42,30 +42,30 @@
                         </div>
                         
                         <!-- User IDs Input -->
-                        <div class="mb-6" id="userSelect" style="display:none;">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-8" id="userSelect" style="display:none;">
+                            <label class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                 <i class="fas fa-id-card mr-2"></i>指定用户ID
                             </label>
                             <input 
                                 type="text" 
                                 name="target_users" 
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                class="block w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="例如: 7897880011, 123456789"
                             >
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">多个用户ID用逗号分隔</p>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">多个用户ID用逗号分隔</p>
                         </div>
                         
                         <!-- Message Content -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-8">
+                            <label class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                 <i class="fas fa-edit mr-2"></i> 消息内容
                             </label>
                             <textarea 
                                 name="message" 
-                                rows="10" 
+                                rows="12" 
                                 id="messageContent" 
                                 required 
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                                class="block w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                                 placeholder="输入要推送的消息内容...
 
 支持变量：
@@ -78,44 +78,44 @@
 <i>斜体</i>
 <code>代码</code>"
                             ></textarea>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">支持HTML格式和Markdown格式</p>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持HTML格式和Markdown格式</p>
                         </div>
 
                         <!-- Push Type -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-8">
+                            <label class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                 推送类型
                             </label>
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-3 gap-3">
                                 <input type="radio" name="push_type" id="typeText" value="text" checked class="hidden">
-                                <label for="typeText" class="flex items-center justify-center px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-sm">
+                                <label for="typeText" class="flex items-center justify-center px-4 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-md">
                                     <i class="fas fa-file-alt mr-2"></i> 纯文本
                                 </label>
                                 
                                 <input type="radio" name="push_type" id="typeHTML" value="html" class="hidden">
-                                <label for="typeHTML" class="flex items-center justify-center px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-sm">
+                                <label for="typeHTML" class="flex items-center justify-center px-4 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-md">
                                     <i class="fas fa-code mr-2"></i> HTML
                                 </label>
                                 
                                 <input type="radio" name="push_type" id="typeMarkdown" value="markdown" class="hidden">
-                                <label for="typeMarkdown" class="flex items-center justify-center px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-sm">
+                                <label for="typeMarkdown" class="flex items-center justify-center px-4 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600 transition-all shadow-md">
                                     <i class="fab fa-markdown mr-2"></i> Markdown
                                 </label>
                             </div>
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex gap-3">
+                        <div class="flex gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <button 
                                 type="button" 
                                 onclick="previewMessage()"
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium text-base"
                             >
                                 <i class="fas fa-eye mr-2"></i> 预览消息
                             </button>
                             <button 
                                 type="submit" 
-                                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-base"
                             >
                                 <i class="fas fa-paper-plane mr-2"></i> 立即推送
                             </button>
@@ -134,22 +134,22 @@
                         <i class="fas fa-chart-bar mr-2"></i> 用户统计
                     </h3>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-5">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">总用户数</span>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">{{ stats.all }}</span>
+                        <span class="text-base text-gray-600 dark:text-gray-400">总用户数</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.all }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">等待客服</span>
-                        <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">{{ stats.waiting }}</span>
+                        <span class="text-base text-gray-600 dark:text-gray-400">等待客服</span>
+                        <span class="text-xl font-bold text-yellow-600 dark:text-yellow-400">{{ stats.waiting }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">已绑定</span>
-                        <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ stats.bound }}</span>
+                        <span class="text-base text-gray-600 dark:text-gray-400">已绑定</span>
+                        <span class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.bound }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">已完成充值</span>
-                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ stats.transfer_completed }}</span>
+                        <span class="text-base text-gray-600 dark:text-gray-400">已完成充值</span>
+                        <span class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ stats.transfer_completed }}</span>
                     </div>
                 </div>
             </div>
@@ -161,22 +161,22 @@
                         <i class="fas fa-lightbulb mr-2"></i> 使用提示
                     </h3>
                 </div>
-                <div class="p-6 space-y-4 text-sm">
+                <div class="p-6 space-y-5">
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white mb-2">变量替换：</p>
-                        <ul class="space-y-1 text-gray-600 dark:text-gray-400">
-                            <li>• {username} - 用户名</li>
-                            <li>• {wallet} - 钱包地址</li>
-                            <li>• {user_id} - 用户ID</li>
+                        <p class="font-semibold text-gray-900 dark:text-white mb-2">变量替换：</p>
+                        <ul class="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
+                            <li class="flex items-center">• {username} - 用户名</li>
+                            <li class="flex items-center">• {wallet} - 钱包地址</li>
+                            <li class="flex items-center">• {user_id} - 用户ID</li>
                         </ul>
                     </div>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white mb-2">推送对象：</p>
-                        <ul class="space-y-1 text-gray-600 dark:text-gray-400">
-                            <li>• 全部用户 - 所有人</li>
-                            <li>• 等待客服 - 刚收到$100的用户</li>
-                            <li>• 已绑定 - 已完成绑定</li>
-                            <li>• 精确推送 - 指定ID</li>
+                        <p class="font-semibold text-gray-900 dark:text-white mb-2">推送对象：</p>
+                        <ul class="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
+                            <li class="flex items-center">• 全部用户 - 所有人</li>
+                            <li class="flex items-center">• 等待客服 - 刚收到$100的用户</li>
+                            <li class="flex items-center">• 已绑定 - 已完成绑定</li>
+                            <li class="flex items-center">• 精确推送 - 指定ID</li>
                         </ul>
                     </div>
                 </div>
