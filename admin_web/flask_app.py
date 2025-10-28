@@ -420,20 +420,11 @@ def send_user_message(user_id):
     
     # 发送消息
     if send_telegram_message(user_id, message):
-        # 持久化到本地会话历史，便于刷新后仍可见
-        sessions = load_sessions()
-        user_session = sessions.get(user_id)
-        if user_session is None:
-            user_session = {}
-            sessions[user_id] = user_session
-        history = user_session.get('history') or []
-        history.append({
-            'role': 'assistant',
-            'content': message
-        })
-        user_session['history'] = history
-        save_sessions(sessions)
-        
+        # 写入数据库会话历史，保持与Bot一致
+        try:
+            db.save_conversation(user_id, 'assistant', message)
+        except Exception as e:
+            print(f"保存管理员发送对话失败: {e}")
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Failed to send message'})
