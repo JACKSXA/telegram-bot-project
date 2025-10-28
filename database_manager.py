@@ -488,6 +488,69 @@ class DatabaseManager:
             print(f"记录事件失败: {e}")
             return False
     
+    # ====== 营销旅程 ======
+    def create_journey_node(self, journey_key: str, node: str, config: Dict[str, Any]) -> bool:
+        """创建旅程节点（状态触发点）"""
+        try:
+            config_json = json.dumps(config) if config else None
+            if USE_POSTGRES:
+                cursor = self.conn.cursor()
+                cursor.execute("INSERT INTO journeys (journey_key, node, config, active) VALUES (%s, %s, %s, 1)", (journey_key, node, config_json))
+                self.conn.commit()
+                return True
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("INSERT INTO journeys (journey_key, node, config, active) VALUES (?, ?, ?, 1)", (journey_key, node, config_json))
+                conn.commit()
+                if self.db_path != ":memory:":
+                    conn.close()
+                return True
+        except Exception as e:
+            print(f"创建旅程节点失败: {e}")
+            return False
+    
+    def get_journey_nodes(self, journey_key: str) -> list:
+        """获取旅程的所有节点"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                cursor.execute("SELECT node, config, active FROM journeys WHERE journey_key = %s AND active = 1", (journey_key,))
+                return [dict(row) for row in cursor.fetchall()]
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("SELECT node, config, active FROM journeys WHERE journey_key = ? AND active = 1", (journey_key,))
+                rows = [dict(row) for row in cursor.fetchall()]
+                if self.db_path != ":memory:":
+                    conn.close()
+                return rows
+        except Exception as e:
+            print(f"获取旅程节点失败: {e}")
+            return []
+    
+    def check_journey_trigger(self, user_id: int, trigger_state: str) -> Optional[Dict[str, Any]]:
+        """检查是否应该触发旅程动作"""
+        try:
+            # 检查是否有针对该状态的旅程配置
+            journey_key = f"state_{trigger_state}"
+            nodes = self.get_journey_nodes(journey_key)
+            
+            if not nodes:
+                return None
+            
+            # 返回第一个活跃节点的配置
+            for node in nodes:
+                if node.get('active', 1) == 1:
+                    config = node.get('config')
+                    if config:
+                        try:
+                            return json.loads(config) if isinstance(config, str) else config
+                        except:
+                            pass
+            return None
+        except Exception as e:
+            print(f"检查旅程触发失败: {e}")
+            return None
+    
     # ====== 模板中心 ======
     def get_templates(self, active_only: bool = True) -> list:
         """获取消息模板列表"""

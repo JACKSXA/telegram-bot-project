@@ -941,6 +941,39 @@ def api_get_variant(exp_key):
         logger.error(f"获取变体失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/journeys/<journey_key>', methods=['POST'])
+def api_create_journey(journey_key):
+    """创建营销旅程节点"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    node = data.get('node')
+    config = data.get('config', {})
+    
+    if not node:
+        return jsonify({'success': False, 'error': 'Missing node'})
+    
+    try:
+        result = db.create_journey_node(journey_key, node, config)
+        return jsonify({'success': result})
+    except Exception as e:
+        logger.error(f"创建旅程失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/journeys/<journey_key>/trigger')
+def api_check_journey_trigger(journey_key):
+    """检查旅程触发条件"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        nodes = db.get_journey_nodes(journey_key)
+        return jsonify({'success': True, 'nodes': nodes})
+    except Exception as e:
+        logger.error(f"检查旅程失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))
