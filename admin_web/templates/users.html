@@ -47,10 +47,12 @@
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar me-2">
                                     {% if user.avatar_url %}
-                                        <img src="{{ user.avatar_url }}" alt="Avatar" class="avatar-circle" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        <img src="{{ user.avatar_url }}" alt="Avatar" class="avatar-circle" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;">
                                     {% else %}
-                                        <div class="avatar-circle">
-                                            <i class="fas fa-user"></i>
+                                        <div class="avatar-circle auto-avatar" 
+                                             data-username="{{ user.username or user.first_name or 'N' }}"
+                                             data-userid="{{ user.user_id }}"
+                                             style="width: 40px; height: 40px;">
                                         </div>
                                     {% endif %}
                                 </div>
@@ -98,6 +100,41 @@
 </div>
 
 <script>
+// 生成默认头像颜色和首字母
+function generateAvatarColor(username) {
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', 
+        '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+        '#F1948A', '#82E0AA', '#F7DC6F', '#F8C471'
+    ];
+    
+    if (!username || username === 'N/A' || username === 'None') {
+        username = 'N';
+    }
+    
+    const firstChar = username.charAt(0).toUpperCase();
+    const colorIndex = firstChar.charCodeAt(0) % colors.length;
+    
+    return {
+        color: colors[colorIndex],
+        initial: firstChar
+    };
+}
+
+// 页面加载时生成所有默认头像
+document.addEventListener('DOMContentLoaded', function() {
+    const avatars = document.querySelectorAll('.auto-avatar');
+    avatars.forEach(avatar => {
+        const username = avatar.getAttribute('data-username') || 'N';
+        const {color, initial} = generateAvatarColor(username);
+        
+        avatar.style.background = color;
+        avatar.style.color = '#FFFFFF';
+        avatar.style.fontWeight = 'bold';
+        avatar.textContent = initial;
+    });
+});
+
 function filterTable() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
