@@ -270,11 +270,13 @@ class DatabaseManager:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
-                             (int(user_id), str(role), str(content)))
+                             (int(user_id), str(role or ''), str(content or '')))
                 conn.commit()
                 conn.close()
         except Exception as e:
             print(f"保存对话失败: {e}")
+            import traceback
+            traceback.print_exc()
     
     def get_conversations(self, user_id: int, limit: int = 100) -> list:
         """获取用户对话历史"""

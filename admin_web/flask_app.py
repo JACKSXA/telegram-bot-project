@@ -391,13 +391,30 @@ def user_history(user_id):
     try:
         conversations = db.get_conversations(user_id, limit=200)
         print(f"[HISTORY] fetch {user_id} -> {len(conversations)} rows")
-        # 兜底：如果数据库为空，同时尝试从旧sessions中读取
-        if not conversations:
-            sessions = load_sessions()
-            history = (sessions.get(user_id, {}) or {}).get('history', [])
-            print(f"[HISTORY] fallback sessions -> {len(history)} rows")
-            return jsonify({'success': True, 'history': history})
-        return jsonify({'success': True, 'history': conversations})
+        # 合并旧 sessions 历史，避免因Bot未入库导致缺失
+        sessions = load_sessions()
+        sessions_hist = (sessions.get(user_id, {}) or {}).get('history', [])
+        print(f"[HISTORY] sessions -> {len(sessions_hist)} rows")
+        merged = []
+        # 标准化结构
+        for m in conversations:
+            merged.append({'role': m.get('role'), 'content': m.get('content'), 'timestamp': m.get('timestamp')})
+        for m in sessions_hist:
+            merged.append({'role': m.get('role'), 'content': m.get('content'), 'timestamp': m.get('timestamp')})
+        # 去重（按 role+content 相同视为重复），并按内容长度+顺序保留
+        seen = set()
+        dedup = []
+        for m in merged:
+            key = (m.get('role'), m.get('content'))
+            if key in seen:
+                continue
+            seen.add(key)
+            dedup.append(m)
+        # 排序：无timestamp的放前，再按timestamp升序
+        def sort_key(m):
+            return (0 if not m.get('timestamp') else 1, str(m.get('timestamp')))
+        dedup.sort(key=sort_key)
+        return jsonify({'success': True, 'history': dedup[-200:]})
     except Exception as e:
         print(f"[HISTORY][ERROR] {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
