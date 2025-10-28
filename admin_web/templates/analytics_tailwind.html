@@ -76,20 +76,11 @@
             </div>
             <div class="p-6">
                 <div class="space-y-4">
-                    {% set completed_count = data.state_distribution.get('completed', 0) %}
-                    {% set waiting_transfer_count = data.state_distribution.get('waiting_transfer', 0) %}
-                    {% set wallet_verified_count = data.state_distribution.get('wallet_verified', 0) %}
-                    {% set bound_ready_count = data.state_distribution.get('bound_and_ready', 0) + data.state_distribution.get('bound', 0) %}
-                    {% set waiting_cs_count = data.state_distribution.get('waiting_customer_service', 0) + data.state_distribution.get('waiting', 0) %}
-                    {% set transfer_done_count = data.state_distribution.get('transfer_completed', 0) %}
-                    
-                    {# 计算钱包绑定数量 #}
-                    {% set wallet_bound_count = 0 %}
-                    {% for state, count in data.state_distribution.items() %}
-                        {% if state in ['wallet_verified', 'verified', 'bound_and_ready', 'bound', 'completed', 'waiting_customer_service'] %}
-                            {% set wallet_bound_count = wallet_bound_count + count %}
-                        {% endif %}
-                    {% endfor %}
+                    {# 使用数据库直采快照，确保数据同步 #}
+                    {% set wallet_bound_count = data.get('wallet_bound', 0) %}
+                    {% set waiting_cs_count = data.get('waiting_cs', 0) %}
+                    {% set bound_ready_count = data.get('bound_ready', 0) %}
+                    {% set transfer_done_count = data.get('transfer_completed', 0) %}
                     
                     {% set steps = [
                         ('注册用户', data.total_users, 'blue'),

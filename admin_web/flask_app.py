@@ -303,7 +303,12 @@ def analytics():
         'language_distribution': snapshot.get('language_distribution', {}),
         'conversion_rates': snapshot.get('conversion_rates', {}),
         'recent_users': 0,
-        'total_users': snapshot.get('total_users', 0)
+        'total_users': snapshot.get('total_users', 0),
+        # 传递快照统计到模板
+        'wallet_bound': snapshot.get('wallet_bound', 0),
+        'waiting_cs': snapshot.get('waiting_cs', 0),
+        'bound_ready': snapshot.get('bound_ready', 0),
+        'transfer_completed': snapshot.get('transfer_completed', 0),
     }
     
     return render_template('analytics_tailwind.html', data=analytics_data)
