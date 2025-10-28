@@ -134,7 +134,7 @@
                     </div>
                     <div class="flex gap-2">
                         <button 
-                            onclick="saveUser()"
+                            onclick="openConfirmSave()"
                             class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                         >
                             <i class="fas fa-save mr-2"></i> 保存修改
@@ -205,6 +205,26 @@
             </div>
         </div>
     </div>
+</div>
+
+<div id="confirmSaveModal" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 shadow-2xl">
+      <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          <i class="fas fa-question-circle text-blue-500 mr-2"></i> 确认保存修改？
+        </h3>
+      </div>
+      <div class="px-5 py-4 text-gray-700 dark:text-gray-300">
+        将更新该用户的备注与钱包地址。
+      </div>
+      <div class="px-5 py-4 flex gap-3 justify-end border-t border-gray-200 dark:border-gray-700">
+        <button onclick="closeConfirmSave()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">取消</button>
+        <button onclick="saveUser()" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">确认保存</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -305,30 +325,34 @@ function showSuccessMessage(text) {
 
 // 已移除顶部 prompt 发送逻辑，统一使用底部输入框
 
+function openConfirmSave(){
+  const modal=document.getElementById('confirmSaveModal');
+  modal.classList.remove('hidden');
+}
+function closeConfirmSave(){
+  const modal=document.getElementById('confirmSaveModal');
+  modal.classList.add('hidden');
+}
 function saveUser() {
     const note = document.getElementById('noteInput').value;
     const wallet = document.getElementById('walletInput').value;
-    
     fetch('/user/{{ user_id }}/update', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            note: note,
-            wallet: wallet
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note, wallet })
     })
     .then(response => response.json())
     .then(data => {
+        closeConfirmSave();
         if (data.success) {
-            alert('✅ 保存成功！');
-            location.reload();
+            showSuccessMessage('✅ 保存成功！');
+            setTimeout(()=> location.reload(), 800);
         } else {
             alert('❌ 保存失败：' + data.error);
         }
     })
     .catch(error => {
+        closeConfirmSave();
         alert('❌ 保存失败：' + error);
     });
 }
