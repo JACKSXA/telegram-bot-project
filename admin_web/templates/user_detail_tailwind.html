@@ -338,14 +338,14 @@ function saveUser() {
 let lastRenderedCount = {{ user_data.get('history', [])|length }};
 // 页面加载后立即拉一次，避免等待首个5秒
 refreshHistory();
-async function refreshHistory() {
+async function refreshHistory(force = false) {
     try {
         const res = await fetch('/user/{{ user_id }}/history');
         const data = await res.json();
         if (!data.success) return;
         const history = data.history || [];
-        // 仅在数量变化时重新渲染，避免闪烁
-        if (history.length !== lastRenderedCount) {
+        // 数量变化或强制刷新时重新渲染
+        if (force || history.length !== lastRenderedCount) {
             const container = document.getElementById('historyContainer');
             if (container) {
                 container.innerHTML = '';

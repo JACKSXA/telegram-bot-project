@@ -390,6 +390,11 @@ def user_history(user_id):
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
     try:
         conversations = db.get_conversations(user_id, limit=200)
+        # 兜底：如果数据库为空，同时尝试从旧sessions中读取
+        if not conversations:
+            sessions = load_sessions()
+            history = (sessions.get(user_id, {}) or {}).get('history', [])
+            return jsonify({'success': True, 'history': history})
         return jsonify({'success': True, 'history': conversations})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

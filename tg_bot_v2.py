@@ -628,6 +628,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             db.save_conversation(user_id, 'user', user_message)
         except Exception as e:
             logger.warning(f"保存用户消息失败: {e}")
+        # 尝试推送到管理员后台实时刷新（可选）
+        try:
+            pass
+        except Exception:
+            pass
     
     # ====== 优先处理：管理员确认转账完成（在群组中发送）======
     if chat_type in ['group', 'supergroup'] and chat_id == int(ADMIN_GROUP_ID or 0):
@@ -1298,98 +1303,6 @@ Reply in a gentle but firm tone, don't make user feel questioned, but help them 
     # 发送回复
     await update.message.reply_text(ai_response)
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理 /help 命令"""
-    user_id = update.effective_user.id
-    lang = get_user_language(user_id)
-    
-    if lang == 'zh':
-        help_text = """🤖 机器人帮助
-
-【主要功能】
-• 创建钱包 - 为您生成安全的Solana钱包
-• 链上验证 - 检查您的钱包地址安全性
-• 资产管理 - 帮助您管理数字资产
-
-【常用命令】
-/start - 开始使用机器人
-/status - 查看当前状态
-/wallet - 查看/生成钱包地址
-/reset - 重置会话
-
-【安全提示】
-• 您的私钥完全由您掌握
-• 资金100%安全
-• 不要向任何人泄露私钥
-
-需要帮助随时发送消息！"""
-    else:
-        help_text = """🤖 Bot Help
-
-【Main Features】
-• Create Wallet - Generate a secure Solana wallet for you
-• On-chain Verification - Check your wallet address security
-• Asset Management - Help you manage digital assets
-
-【Common Commands】
-/start - Start using the bot
-/status - Check current status
-/wallet - View/Generate wallet address
-/reset - Reset session
-
-【Security Tips】
-• Your private key is fully under your control
-• Funds are 100% secure
-• Never share your private key with anyone
-
-Need help? Just send a message!"""
-    
-    await update.message.reply_text(help_text)
-
-async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理 /status 命令"""
-    user_id = update.effective_user.id
-    lang = get_user_language(user_id)
-    state = get_user_state(user_id)
-    wallet = user_sessions.get(user_id, {}).get('wallet', '')
-    
-    if lang == 'zh':
-        status_text = f"📊 当前状态：{state}\n\n"
-        if wallet:
-            status_text += f"💼 钱包地址：{wallet[:10]}...{wallet[-10:]}\n"
-        else:
-            status_text += "💼 钱包地址：未绑定\n"
-        status_text += "\n使用 /reset 可以重新开始"
-    else:
-        status_text = f"📊 Current Status: {state}\n\n"
-        if wallet:
-            status_text += f"💼 Wallet: {wallet[:10]}...{wallet[-10:]}\n"
-        else:
-            status_text += "💼 Wallet: Not bound\n"
-        status_text += "\nUse /reset to start over"
-    
-    await update.message.reply_text(status_text)
-
-async def wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理 /wallet 命令"""
-    user_id = update.effective_user.id
-    lang = get_user_language(user_id)
-    wallet = user_sessions.get(user_id, {}).get('wallet', '')
-    
-    if wallet:
-        if lang == 'zh':
-            wallet_msg = f"💼 您的钱包地址：\n\n`{wallet}`\n\n"
-            wallet_msg += "您的地址已与我们的智能合约绑定。"
-        else:
-            wallet_msg = f"💼 Your Wallet Address:\n\n`{wallet}`\n\n"
-            wallet_msg += "Your address is bound to our smart contract."
-        await update.message.reply_text(wallet_msg, parse_mode='Markdown')
-    else:
-        if lang == 'zh':
-            await update.message.reply_text("您还没有钱包地址，请使用 /start 开始创建。")
-        else:
-            await update.message.reply_text("You don't have a wallet address yet. Use /start to begin.")
-
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """重置会话"""
     user_id = update.effective_user.id
@@ -1422,9 +1335,6 @@ def main():
     
     # 添加处理器
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("status", status_command))
-    application.add_handler(CommandHandler("wallet", wallet_command))
     application.add_handler(CommandHandler("reset", reset))
     application.add_handler(CallbackQueryHandler(language_callback, pattern="^lang_"))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
