@@ -11,11 +11,33 @@
 <!-- 搜索栏 -->
 <div class="card mb-4">
     <div class="card-body">
-        <div class="input-group">
-            <input type="text" class="form-control" id="searchInput" placeholder="搜索用户ID或钱包地址...">
-            <button class="btn btn-primary" onclick="filterTable()">
-                <i class="fas fa-search"></i> 搜索
-            </button>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索用户ID、用户名、钱包地址..." oninput="filterTable()">
+                    <button class="btn btn-outline-secondary" onclick="document.getElementById('searchInput').value=''; filterTable();">
+                        <i class="fas fa-times"></i> 清除
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="filterLanguage" onchange="filterTable()">
+                        <option value="">所有语言</option>
+                        <option value="zh">中文</option>
+                        <option value="en">English</option>
+                    </select>
+                    <select class="form-select" id="filterState" onchange="filterTable()">
+                        <option value="">所有状态</option>
+                        <option value="idle">空闲</option>
+                        <option value="waiting_wallet">等待钱包</option>
+                        <option value="wallet_verified">已验证</option>
+                        <option value="waiting_transfer">等待转账</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -137,16 +159,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function filterTable() {
     const input = document.getElementById('searchInput');
-    const filter = input.value.toLowerCase();
+    const searchText = input.value.toLowerCase();
+    const filterLanguage = document.getElementById('filterLanguage').value;
+    const filterState = document.getElementById('filterState').value;
+    
     const table = document.querySelector('table tbody');
     const rows = table.querySelectorAll('tr');
 
     rows.forEach(row => {
+        // 搜索关键词（ID、钱包）
         const userid = row.getAttribute('data-userid');
         const wallet = row.getAttribute('data-wallet');
-        const text = (userid + ' ' + wallet).toLowerCase();
+        const searchMatch = searchText === '' || 
+            (userid + ' ' + wallet).toLowerCase().includes(searchText) ||
+            row.textContent.toLowerCase().includes(searchText);
         
-        if (text.includes(filter)) {
+        // 语言筛选
+        const languageCell = row.cells[3];
+        const language = languageCell?.textContent || '';
+        const languageMatch = filterLanguage === '' || language.includes(filterLanguage === 'zh' ? '中文' : 'English');
+        
+        // 状态筛选
+        const stateCell = row.cells[5];
+        const state = stateCell?.textContent || '';
+        const stateMatch = filterState === '' || state.toLowerCase().includes(filterState.toLowerCase());
+        
+        // 综合匹配
+        if (searchMatch && languageMatch && stateMatch) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
