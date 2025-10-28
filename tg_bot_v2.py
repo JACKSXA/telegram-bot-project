@@ -1294,6 +1294,12 @@ Reply in a gentle but firm tone, don't make user feel questioned, but help them 
     history.append({"role": "assistant", "content": ai_response})
     user_sessions[user_id]['history'] = history[-10:]  # 保留最近10轮对话
     
+    # 保存用户消息到数据库
+    try:
+        db.save_conversation(user_id, 'user', user_message)
+    except Exception as e:
+        logger.warning(f"保存用户消息到数据库失败: {e}")
+    
     # 保存Bot回复到数据库
     try:
         db.save_conversation(user_id, 'assistant', ai_response)
