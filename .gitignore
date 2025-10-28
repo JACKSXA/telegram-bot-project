@@ -39,3 +39,17 @@ archive/*.md
 # 临时文件
 *.tmp
 *.bak
+
+# 敏感文件
+.env
+.env.local
+env_config.txt
+flask_session/
+admin_web/flask_session/
+*.db
+!database_manager.py
+push_history.json
+user_sessions.json
+netlify_deploy/.netlify_token
+backups/
+backup_*.db

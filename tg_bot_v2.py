@@ -582,6 +582,10 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     lang = query.data.split('_')[1]  # 'lang_zh' -> 'zh'
     
+    # ✅ 立即显示加载状态，给用户即时反馈
+    loading_msg = "⏳ 正在准备中... / Preparing..." if lang == 'zh' else "⏳ Preparing..."
+    await query.edit_message_text(text=loading_msg)
+    
     # 初始化对话历史
     if user_id not in user_sessions:
         user_sessions[user_id] = {}
@@ -602,9 +606,9 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     set_user_language(user_id, lang)
     set_user_state(user_id, 'language_set')
     
-    # 使用AI按照剧本开始对话
+    # ✅ 使用异步后台线程调用AI，不阻塞UI
     initial_message = "你好，请介绍一下" if lang == 'zh' else "Hello, please introduce"
-    ai_greeting = get_ai_response(initial_message, [], lang)
+    ai_greeting = await asyncio.to_thread(get_ai_response, initial_message, [], lang)
     
     # 保存对话历史
     user_sessions[user_id]['history'] = [

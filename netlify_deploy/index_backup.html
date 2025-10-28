@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Web3量化套利 | 机构级量化交易平台</title>
+    <meta name="description" content="专业Web3量化套利服务，日化收益2-5%，机构级安全，新人送$100 USDT">
+    
+    <style>
+        /* ========== 基础设置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --bg-dark: #0a0e27;
+            --bg-light: #1a1f3a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* 字体大小变量 - 桌面端 */
+            --h1-size: 64px;
+            --h2-size: 42px;
+            --h3-size: 32px;
+            --subtitle-size: 22px;
+            --body-size: 16px;
+            --small-size: 14px;
+            --stat-size: 52px;
+            --feature-title-size: 20px;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            font-size: var(--body-size);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ========== Canvas粒子背景 ========== */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ========== 流动渐变背景 ========== */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(135deg, 
+                var(--bg-dark) 0%, 
+                var(--bg-light) 50%, 
+                var(--bg-dark) 100%);
+            animation: gradientFlow 15s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        /* ========== 鼠标光效 ========== */
+        .cursor-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        /* ========== 主容器 ========== */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ========== 紧急招聘横幅 ========== */
+        .urgent-banner {
+            background: linear-gradient(135deg, 
+                rgba(255, 87, 51, 0.15) 0%,
+                rgba(251, 176, 59, 0.15) 50%,
+                rgba(255, 87, 51, 0.15) 100%);
+            border: 2px solid rgba(255, 87, 51, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 80px 0 40px;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(255, 87, 51, 0.2),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .urgent-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { 
+                transform: translateX(-100%) scale(1);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(100%) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .urgent-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .urgent-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff5733, #fbb03b);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(255, 87, 51, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .urgent-title {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #fff;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+        }
+
+        .urgent-desc {
+            font-size: 18px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        .urgent-desc strong {
+            color: #fbb03b;
+            font-weight: 700;
+        }
+
+        .urgent-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .highlight-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .highlight-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-8px) scale(1.05);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        .highlight-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* ========== 语言切换 - 玻璃拟态 ========== */
+        .lang-switch {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            gap: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn {
+            padding: 8px 18px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            min-width: 50px;
+        }
+
+        .lang-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ========== 头部区域 ========== */
+        header {
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2); 
+            }
+            50% { 
+                transform: scale(1.15); 
+                box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .status-badge::before {
+            content: '🔥';
+            animation: flicker 2s ease-in-out infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        h1 {
+            font-size: var(--h1-size);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            letter-spacing: -2.5px;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-subtitle {
+            font-size: var(--subtitle-size);
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 数据展示 - 3D卡片效果 ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin: 60px 0;
+            perspective: 1000px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-20px) scale(1.08);
+            border-color: rgba(102, 126, 234, 0.8);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.5),
+                        0 0 120px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .stat-card:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .stat-value {
+            font-size: var(--stat-size);
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.4s;
+            line-height: 1.1;
+        }
+
+        .stat-card:hover .stat-value {
+            transform: scale(1.1);
+        }
+
+        .stat-label {
+            font-size: var(--small-size);
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 1;
+            line-height: 1.4;
+        }
+
+        /* ========== 主卡片 - 玻璃拟态 ========== */
+        .main-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 50px 40px;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent 0deg,
+                rgba(102, 126, 234, 0.1) 180deg,
+                transparent 360deg
+            );
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== 功能特色 - 3D倾斜卡片 ========== */
+        .section-title {
+            font-size: var(--h2-size);
+            font-weight: 800;
+            margin-bottom: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff, #cbd5e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            border-radius: 14px;
+            padding: 24px 20px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 20px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.5s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(10, 14, 39, 0.6) 0%, 
+                rgba(26, 31, 58, 0.5) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            z-index: -1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) rotateX(5deg) scale(1.03);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.5),
+                        0 0 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.3) rotateY(360deg);
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.6));
+        }
+
+        .feature-title {
+            font-size: var(--feature-title-size);
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+        }
+
+        /* ========== 公告框 ========== */
+        .notice-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            margin: 50px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notice-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+
+        @keyframes shine {
+            to { left: 100%; }
+        }
+
+        .notice-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-content {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        /* ========== FAQ ========== */
+        .faq-grid {
+            display: grid;
+            gap: 16px;
+            margin: 50px 0;
+        }
+
+        .faq-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(15px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.7);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .faq-question {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .faq-answer {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+        }
+
+        /* ========== CTA区域 ========== */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 28px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 60px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(102, 126, 234, 0.5);
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: rotate 25s linear infinite;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .cta-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .countdown-wrap {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 35px 0 40px;
+            flex-wrap: wrap;
+        }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            border-radius: 14px;
+            min-width: 90px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .countdown-box:hover {
+            transform: translateY(-10px) scale(1.1);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        .countdown-number {
+            font-size: 40px;
+            font-weight: 900;
+            display: block;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+        }
+
+        .countdown-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #fff;
+            color: var(--primary);
+            padding: 18px 50px;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5),
+                        0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        .telegram-note {
+            margin-top: 35px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+        }
+
+        .telegram-id {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 24px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-weight: 700;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* ========== 底部 ========== */
+        footer {
+            text-align: center;
+            padding: 50px 0;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin-top: 60px;
+        }
+
+        footer p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* ========== 响应式设计 ========== */
+        
+        /* 大屏幕 (1200px+) - 默认值 */
+        
+        /* 平板横屏 (992px - 1199px) */
+        @media (max-width: 1199px) {
+            :root {
+                --h1-size: 56px;
+                --h2-size: 38px;
+                --h3-size: 28px;
+                --subtitle-size: 20px;
+                --stat-size: 46px;
+            }
+            
+            .container { padding: 0 30px; }
+            header { padding: 100px 0 70px; }
+        }
+        
+        /* 平板竖屏 (768px - 991px) */
+        @media (max-width: 991px) {
+            :root {
+                --h1-size: 48px;
+                --h2-size: 34px;
+                --h3-size: 26px;
+                --subtitle-size: 19px;
+                --stat-size: 40px;
+                --feature-title-size: 19px;
+            }
+            
+            header { padding: 80px 0 60px; }
+            .main-card { padding: 40px 30px; }
+            .stats-grid { gap: 20px; }
+            .features-grid { 
+                gap: 14px;
+                margin: 35px 0;
+            }
+            .feature-card {
+                padding: 22px 18px;
+            }
+            .cta-section { padding: 50px 35px; }
+        }
+        
+        /* 大手机 (576px - 767px) */
+        @media (max-width: 767px) {
+            .urgent-banner {
+                padding: 30px 24px;
+                margin: 60px 0 30px;
+                border-radius: 16px;
+            }
+            
+            .urgent-title {
+                font-size: 26px;
+                margin-bottom: 16px;
+            }
+            
+            .urgent-desc {
+                font-size: 16px;
+                line-height: 1.7;
+                margin-bottom: 25px;
+            }
+            
+            .urgent-highlights {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .highlight-item {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .highlight-icon {
+                font-size: 20px;
+                margin-bottom: 6px;
+            }
+        
+        /* 大手机 (576px - 767px) */
+        @media (max-width: 767px) {
+            :root {
+                --h1-size: 36px;
+                --h2-size: 28px;
+                --h3-size: 24px;
+                --subtitle-size: 17px;
+                --body-size: 15px;
+                --small-size: 13px;
+                --stat-size: 36px;
+                --feature-title-size: 18px;
+            }
+            
+            body { font-size: 15px; }
+            .container { padding: 0 20px; }
+            
+            header { padding: 70px 0 50px; }
+            h1 { 
+                letter-spacing: -1.5px; 
+            margin-bottom: 20px;
+            }
+            .hero-subtitle { 
+                line-height: 1.6;
+                padding: 0 10px;
+            }
+            
+            .status-badge {
+                padding: 8px 20px;
+                font-size: 12px;
+                margin-bottom: 25px;
+            }
+            
+            .lang-switch { 
+                top: 15px; 
+                right: 15px; 
+                padding: 3px;
+            }
+            .lang-btn {
+                padding: 7px 14px;
+                font-size: 12px;
+                min-width: 45px;
+            }
+            
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                margin: 50px 0;
+            }
+            .stat-card { 
+                padding: 28px 20px;
+                border-radius: 16px;
+            }
+            .stat-value {
+                margin-bottom: 8px;
+            }
+            
+            .main-card { 
+                padding: 35px 24px;
+                border-radius: 24px;
+                margin-bottom: 40px;
+            }
+            
+            .section-title {
+                margin-bottom: 35px;
+                letter-spacing: -0.5px;
+            }
+            
+            .features-grid { 
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin: 30px 0;
+            }
+            .feature-card { 
+                padding: 20px 18px;
+                border-radius: 12px;
+            }
+            .feature-icon {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            .feature-title {
+                margin-bottom: 8px;
+            }
+            .feature-desc {
+                font-size: 13px;
+                line-height: 1.55;
+            }
+            
+            .notice-box {
+                padding: 28px 24px;
+                border-radius: 16px;
+            margin: 40px 0;
+            }
+            .notice-title {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            .notice-content {
+                font-size: 15px;
+                line-height: 1.7;
+            }
+            
+            .faq-grid {
+                gap: 14px;
+                margin: 40px 0;
+            }
+            .faq-item {
+                padding: 22px 24px;
+                border-radius: 14px;
+            }
+            .faq-question {
+                font-size: 16px;
+            margin-bottom: 8px;
+        }
+            .faq-answer {
+                font-size: 14px;
+            }
+            
+            .cta-section { 
+                padding: 45px 24px;
+                border-radius: 24px;
+                margin: 50px 0;
+            }
+            .cta-title {
+                font-size: 32px;
+                margin-bottom: 14px;
+            }
+            .cta-subtitle {
+                font-size: 16px;
+                margin-bottom: 35px;
+            }
+            .countdown-wrap {
+                gap: 12px;
+                margin: 30px 0 35px;
+            }
+            .countdown-box {
+                padding: 14px 20px;
+                min-width: 80px;
+                border-radius: 12px;
+            }
+            .countdown-number {
+                font-size: 32px;
+                margin-bottom: 4px;
+            }
+        .countdown-label {
+                font-size: 11px;
+            letter-spacing: 1px;
+            }
+            .cta-button {
+                padding: 16px 40px;
+                font-size: 16px;
+                border-radius: 12px;
+            }
+            .telegram-note {
+                font-size: 15px;
+                margin-top: 30px;
+            }
+            .telegram-id {
+                font-size: 15px;
+                padding: 9px 20px;
+                margin-top: 10px;
+            }
+            
+        footer {
+                padding: 40px 0;
+                font-size: 13px;
+                margin-top: 50px;
+            }
+            
+            /* 移动端禁用某些动画以提升性能 */
+            .gradient-bg::before {
+                animation: none;
+            }
+            .stat-card:hover,
+            .feature-card:hover {
+                transform: translateY(-6px);
+            }
+        }
+        
+        /* 小手机 (375px - 575px) */
+        @media (max-width: 575px) {
+            :root {
+                --h1-size: 32px;
+                --h2-size: 26px;
+                --h3-size: 22px;
+                --subtitle-size: 16px;
+                --stat-size: 32px;
+                --feature-title-size: 17px;
+            }
+            
+            .container { padding: 0 16px; }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            
+            .cta-title {
+                font-size: 28px;
+            }
+            
+            .countdown-wrap {
+                gap: 10px;
+            }
+            .countdown-box {
+                padding: 12px 16px;
+                min-width: 70px;
+            }
+            .countdown-number {
+                font-size: 28px;
+            }
+        }
+        
+        /* 超小手机 (< 375px) */
+        @media (max-width: 374px) {
+            :root {
+                --h1-size: 28px;
+                --h2-size: 24px;
+                --subtitle-size: 15px;
+                --stat-size: 28px;
+            }
+            
+            .container { padding: 0 14px; }
+            
+            h1 {
+                letter-spacing: -1px;
+            }
+            
+            .status-badge {
+                padding: 7px 16px;
+                font-size: 11px;
+            }
+
+            .main-card {
+                padding: 30px 20px;
+            }
+            
+            .feature-card {
+                padding: 18px 16px;
+                border-radius: 10px;
+            }
+            .feature-icon {
+                font-size: 26px;
+                margin-bottom: 8px;
+            }
+            
+            .faq-item {
+                padding: 20px 18px;
+            }
+            
+            .cta-section {
+                padding: 40px 20px;
+            }
+            
+            .cta-title {
+                font-size: 26px;
+            }
+            
+            .cta-button {
+                padding: 14px 32px;
+                font-size: 15px;
+            }
+        }
+
+        /* ========== 语言切换 ========== */
+        .lang-zh, .lang-en { display: none; }
+        .lang-zh.active, .lang-en.active { display: block; }
+        .lang-zh.active.inline, .lang-en.active.inline { display: inline; }
+
+        /* ========== 滚动条美化 ========== */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--secondary), var(--primary));
+        }
+    </style>
+</head>
+<body>
+    <!-- 流动渐变背景 -->
+    <div class="gradient-bg"></div>
+    
+    <!-- Canvas粒子背景 -->
+    <canvas id="particleCanvas"></canvas>
+    
+    <!-- 鼠标光效 -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+    
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+        <button class="lang-btn" onclick="setLang('zh')">中文</button>
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    </div>
+
+    <div class="container">
+        <!-- 紧急招聘横幅 -->
+        <div class="urgent-banner">
+            <div class="urgent-content">
+                <div class="urgent-tag">
+                    <span class="lang-zh">🔥 紧急招聘</span>
+                    <span class="lang-en active">🔥 URGENT HIRING</span>
+                </div>
+                <h2 class="urgent-title">
+                    <span class="lang-zh">远程 Web3 资产清算兼职人员</span>
+                    <span class="lang-en active">Remote Web3 Asset Liquidation Partner</span>
+                </h2>
+                <p class="urgent-desc">
+                    <span class="lang-zh">
+                        我们是领先的区块链金融科技机构，正在招聘<strong>个人合作伙伴节点</strong>，协助链上清算和结算工作。
+                        无需坐班，在家即可完成，每日仅需30分钟，<strong>日薪$50-200 USDT</strong>，结算即时到账。
+                    </span>
+                    <span class="lang-en active">
+                        Leading blockchain fintech institution seeking <strong>individual partner nodes</strong> for on-chain liquidation and settlement.
+                        Work from home, only 30 mins daily, <strong>earn $50-200 USDT/day</strong>, instant payment.
+                    </span>
+                </p>
+                <div class="urgent-highlights">
+                    <div class="highlight-item">
+                        <span class="highlight-icon">💼</span>
+                        <span class="lang-zh">远程兼职</span>
+                        <span class="lang-en active">Remote Work</span>
+                    </div>
+                    <div class="highlight-item">
+                        <span class="highlight-icon">⏰</span>
+                        <span class="lang-zh">日薪结算</span>
+                        <span class="lang-en active">Daily Pay</span>
+                    </div>
+                    <div class="highlight-item">
+                        <span class="highlight-icon">🎯</span>
+                        <span class="lang-zh">零门槛</span>
+                        <span class="lang-en active">No Barrier</span>
+                    </div>
+                    <div class="highlight-item">
+                        <span class="highlight-icon">🚀</span>
+                        <span class="lang-zh">即时上岗</span>
+                        <span class="lang-en active">Start Now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <div class="status-badge">
+                <span class="lang-zh">限时招募中</span>
+                <span class="lang-en active">Limited Recruitment</span>
+            </div>
+            
+            <h1>
+                <span class="lang-zh">Web3量化套利</span>
+                <span class="lang-en active">Web3 Quantitative Arbitrage</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                <span class="lang-zh">💰 日化收益2-5% · 🛡️ 机构级安全 · 🎁 新人送$100 USDT</span>
+                <span class="lang-en active">💰 2-5% Daily Returns · 🛡️ Institutional Security · 🎁 $100 USDT Welcome Bonus</span>
+            </p>
+        </header>
+
+        <!-- 数据展示 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">2-5%</div>
+                <div class="stat-label">
+                        <span class="lang-zh">日化收益率</span>
+                    <span class="lang-en active">Daily Return Rate</span>
+                    </div>
+                </div>
+            <div class="stat-card">
+                <div class="stat-value">$100</div>
+                <div class="stat-label">
+                        <span class="lang-zh">新人体验金</span>
+                    <span class="lang-en active">Welcome Bonus</span>
+                    </div>
+                </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">
+                    <span class="lang-zh">零风险门槛</span>
+                    <span class="lang-en active">Zero Risk Entry</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">
+                    <span class="lang-zh">自动化运行</span>
+                    <span class="lang-en active">Automated Trading</span>
+                    </div>
+                </div>
+            </div>
+
+        <!-- 主要内容 -->
+        <div class="main-card">
+            <div class="card-content">
+                <h2 class="section-title">
+                    <span class="lang-zh">核心优势</span>
+                    <span class="lang-en active">Core Advantages</span>
+                </h2>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🚀</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">机构级量化通道</span>
+                            <span class="lang-en active">Institutional Quantitative Access</span>
+                    </div>
+                    <div class="feature-desc">
+                            <span class="lang-zh">对接华尔街顶级量化基金同款策略，利用跨交易所价差套利，年化收益率超800%，已服务5000+高净值用户</span>
+                            <span class="lang-en active">Connect to Wall Street top-tier quantitative strategies, cross-exchange arbitrage with 800%+ APY, serving 5000+ high-net-worth users</span>
+                    </div>
+                </div>
+                
+                    <div class="feature-card">
+                        <span class="feature-icon">💰</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">智能对冲收益</span>
+                            <span class="lang-en active">AI-Hedged Returns</span>
+                    </div>
+                    <div class="feature-desc">
+                            <span class="lang-zh">采用Delta中性策略，无惧市场涨跌，日化收益2-5%持续稳定，过去365天零亏损记录，最大回撤仅0.8%</span>
+                            <span class="lang-en active">Delta-neutral strategy immune to market volatility, 2-5% daily returns, zero loss in 365 days, max drawdown 0.8%</span>
+                    </div>
+                </div>
+                
+                    <div class="feature-card">
+                        <span class="feature-icon">🔒</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">银行级资金安全</span>
+                            <span class="lang-en active">Bank-Grade Security</span>
+                    </div>
+                    <div class="feature-desc">
+                            <span class="lang-zh">资金托管于Gate.io全球前10交易所，采用冷热钱包分离+多重签名技术，私钥由您独立掌控，平台无法触碰资金</span>
+                            <span class="lang-en active">Funds custodied at Gate.io top 10 exchange, cold/hot wallet separation + multi-sig, you control private keys exclusively</span>
+                    </div>
+                </div>
+                
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">链上实时结算</span>
+                            <span class="lang-en active">On-Chain Real-Time Settlement</span>
+                    </div>
+                    <div class="feature-desc">
+                            <span class="lang-zh">每日收益自动入账至您的钱包地址，可链上查询每笔交易记录，提现无需审核，1分钟内到账，T+0随存随取</span>
+                            <span class="lang-en active">Daily profits auto-credited to your wallet, on-chain verifiable, instant withdrawal within 1 min, T+0 liquidity</span>
+                    </div>
+                </div>
+                
+                    <div class="feature-card">
+                        <span class="feature-icon">🎁</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">$100真金体验</span>
+                            <span class="lang-en active">$100 Real Capital Trial</span>
+                    </div>
+                        <div class="feature-desc">
+                            <span class="lang-zh">新用户注册即获$100 USDT真实本金（非体验金），可产生实际收益并提现，无任何使用门槛</span>
+                            <span class="lang-en active">New users receive $100 USDT real capital (not demo), generates actual profits, withdrawable, no threshold required</span>
+                        </div>
+                </div>
+                
+                    <div class="feature-card">
+                        <span class="feature-icon">👥</span>
+                    <div class="feature-title">
+                            <span class="lang-zh">VIP专属服务</span>
+                            <span class="lang-en active">VIP Exclusive Service</span>
+                    </div>
+                    <div class="feature-desc">
+                            <span class="lang-zh">专业量化分析师1对1全程指导，从开户到提现全流程手把手教学，提供独家市场分析报告，平均响应时间<3分钟</span>
+                            <span class="lang-en active">Professional quant analyst 1-on-1 guidance, full onboarding to withdrawal support, exclusive market reports, <3min response time</span>
+                    </div>
+                </div>
+            </div>
+
+                <!-- 公告框 -->
+                <div class="notice-box">
+                    <div class="notice-title">
+                        <span>📢</span>
+                        <span class="lang-zh">重要公告</span>
+                        <span class="lang-en active">Important Notice</span>
+                    </div>
+                    <div class="notice-content">
+                        <span class="lang-zh">
+                            本批次仅开放50个名额，采用实名审核制。我们与Binance、OKX、Gate.io等主流交易所深度合作，通过API接口进行跨平台套利。您的资金始终在自己的钱包中，我们仅获取只读权限进行策略执行，无法动用任何本金。所有收益透明可追溯，已通过CertiK智能合约安全审计。
+                        </span>
+                        <span class="lang-en active">
+                            Limited to 50 spots this batch, KYC required. We partner with Binance, OKX, Gate.io for cross-platform arbitrage via API. Your funds stay in your wallet with read-only access granted. All profits transparent and traceable, CertiK smart contract audited.
+                        </span>
+                </div>
+            </div>
+
+                <!-- FAQ -->
+                <h3 class="section-title" style="font-size: var(--h3-size); margin-top: 60px;">
+                    <span class="lang-zh">常见问题</span>
+                    <span class="lang-en active">FAQ</span>
+                </h3>
+
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span class="lang-zh">💵 需要准备多少资金？零基础能参与吗？</span>
+                            <span class="lang-en active">💵 How much capital is required? Can beginners join?</span>
+                        </div>
+                        <div class="faq-answer">
+                            <span class="lang-zh">完全零成本！我们为新用户提供$100 USDT真实本金（非虚拟体验金），您可以先用这笔钱体验完整套利流程，看到真金白银的收益。无需任何金融背景，系统全自动运行，您只需查看每日收益即可。</span>
+                            <span class="lang-en active">Zero cost! We provide $100 USDT real capital (not demo) for new users. Experience the full arbitrage process and see real profits. No financial background needed, fully automated.</span>
+                        </div>
+                </div>
+                
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span class="lang-zh">🔐 资金安全性如何保障？会不会跑路？</span>
+                            <span class="lang-en active">🔐 How is fund security guaranteed? Risk of exit scam?</span>
+                        </div>
+                    <div class="faq-answer">
+                            <span class="lang-zh">三重保障：①您的资金在自己的Gate.io钱包中，我们只能读取数据执行策略，无法转移资金；②采用智能合约托管，通过CertiK安全审计；③私钥由您独立掌控，即使我们想跑路也拿不走您一分钱。这也是为什么我们敢先给您$100的原因——我们从不接触您的本金。</span>
+                            <span class="lang-en active">Triple protection: ① Your funds in your own Gate.io wallet, we only have read access; ② Smart contract custodied, CertiK audited; ③ You control private keys exclusively. Even if we wanted to run, we can't touch your funds. That's why we dare to give you $100 first.</span>
+                    </div>
+                </div>
+                
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span class="lang-zh">📊 日化2-5%是真的吗？有历史数据证明吗？</span>
+                            <span class="lang-en active">📊 Is 2-5% daily real? Any historical data proof?</span>
+                        </div>
+                    <div class="faq-answer">
+                            <span class="lang-zh">真实数据：我们的策略在过去365天中，平均日化收益3.2%，累计年化收益超1168%，最大回撤仅0.8%。收益来源于跨交易所价差套利（如BTC在Binance是$42,000，在OKX是$42,150，我们赚取差价）。每笔交易都有链上记录可查，您可以用$100先体验3天，看到实际收益再决定。</span>
+                            <span class="lang-en active">Real data: Past 365 days average 3.2% daily, 1168%+ annualized, 0.8% max drawdown. Profits from cross-exchange arbitrage (e.g., BTC $42K on Binance vs $42.15K on OKX, we capture the spread). Every trade on-chain verifiable. Try with $100 for 3 days, see real profits first.</span>
+                    </div>
+                </div>
+                
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span class="lang-zh">⚙️ 操作复杂吗？我完全不懂金融和区块链</span>
+                            <span class="lang-en active">⚙️ Is it complex? I know nothing about finance or blockchain</span>
+                        </div>
+                    <div class="faq-answer">
+                            <span class="lang-zh">3步即可开始赚钱：①下载Gate.io钱包（3分钟）；②提供钱包地址给我们（1分钟）；③收取$100并等待每日收益到账（全自动）。我们配备专业量化分析师1对1全程指导，平均响应时间不超过3分钟，从注册到首笔收益到账，通常只需1小时。已有超过5000名零基础用户成功参与。</span>
+                            <span class="lang-en active">3 steps to start earning: ① Download Gate.io wallet (3 min); ② Provide wallet address (1 min); ③ Receive $100 and wait for daily profits (auto). Professional quant analyst 1-on-1 support, <3min response time. From signup to first profit: ~1 hour. 5000+ beginners already joined successfully.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <div class="cta-content">
+            <div class="cta-title">
+                    <span class="lang-zh">立即开启您的财富之路</span>
+                    <span class="lang-en active">Start Your Wealth Journey Now</span>
+            </div>
+                
+                <div class="cta-subtitle">
+                <span class="lang-zh">仅限前50名，先到先得！</span>
+                    <span class="lang-en active">Limited to first 50 users, first come first served!</span>
+            </div>
+            
+            <!-- 倒计时 -->
+                <div class="countdown-wrap">
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="hours">23</span>
+                        <span class="countdown-label">
+                        <span class="lang-zh">小时</span>
+                            <span class="lang-en active">H</span>
+                        </span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="minutes">59</span>
+                        <span class="countdown-label">
+                        <span class="lang-zh">分钟</span>
+                            <span class="lang-en active">M</span>
+                        </span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="seconds">59</span>
+                        <span class="countdown-label">
+                        <span class="lang-zh">秒</span>
+                            <span class="lang-en active">S</span>
+                        </span>
+                </div>
+            </div>
+
+                <a href="https://t.me/TRC200_bot" class="cta-button" target="_blank">
+                    <span class="lang-zh">加入 Telegram</span>
+                    <span class="lang-en active">Join Telegram</span>
+                </a>
+
+                <div class="telegram-note">
+                    <span class="lang-zh">或搜索：</span>
+                    <span class="lang-en active">Or search:</span>
+                    <div class="telegram-id">@TRC200_bot</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                <span class="lang-zh">⚠️ 投资有风险，入场需谨慎。本平台仅提供量化技术服务。</span>
+                <span class="lang-en active">⚠️ Investment involves risks. This platform provides quantitative technical services only.</span>
+            </p>
+            <p style="margin-top: 10px; opacity: 0.6;">© 2025 Web3 Quantitative Arbitrage</p>
+        </footer>
+    </div>
+
+    <script>
+        // ========== Canvas粒子系统 ==========
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 根据屏幕尺寸调整粒子数量
+        const isMobile = window.innerWidth < 768;
+        const numberOfParticles = isMobile ? 40 : 80;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(102, 126, 234, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const particlesArray = [];
+
+        for (let i = 0; i < numberOfParticles; i++) {
+            particlesArray.push(new Particle());
+        }
+
+        function connectParticles() {
+            const maxDistance = isMobile ? 100 : 150;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    const dx = particlesArray[a].x - particlesArray[b].x;
+                    const dy = particlesArray[a].y - particlesArray[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = (1 - distance / maxDistance) * 0.3;
+                        ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particlesArray.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            if (!isMobile) {
+                connectParticles();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // ========== 鼠标光效 ==========
+        const cursorGlow = document.getElementById('cursorGlow');
+        let mouseX = 0, mouseY = 0;
+        let currentX = 0, currentY = 0;
+
+        if (!isMobile) {
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursorGlow.style.opacity = '1';
+            });
+
+            document.addEventListener('mouseleave', () => {
+                cursorGlow.style.opacity = '0';
+            });
+
+            function animate() {
+                currentX += (mouseX - currentX) * 0.1;
+                currentY += (mouseY - currentY) * 0.1;
+                
+                cursorGlow.style.left = currentX + 'px';
+                cursorGlow.style.top = currentY + 'px';
+                
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // ========== 3D倾斜效果 ==========
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        if (!isMobile) {
+            featureCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+                    
+                    card.style.transform = `translateY(-8px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+                });
+            });
+        }
+
+        // ========== 语言切换 ==========
+        function setLang(lang) {
+            document.querySelectorAll('.lang-' + lang).forEach(el => {
+                el.classList.add('active');
+            });
+            
+            const otherLang = lang === 'zh' ? 'en' : 'zh';
+            document.querySelectorAll('.lang-' + otherLang).forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // ========== 倒计时 ==========
+        function updateCountdown() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const diff = tomorrow - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // ========== 滚动动画 ==========
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-card, .feature-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s, transform 0.6s';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
+
