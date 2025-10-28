@@ -657,7 +657,9 @@ def system_stats():
     
     # 检查数据库
     try:
-        conn = sqlite3.connect('user_data.db')
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sqlite_path = os.path.join(project_root, 'user_data.db')
+        conn = sqlite3.connect(sqlite_path)
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM users")
         stats['total_users'] = cur.fetchone()[0]
