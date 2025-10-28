@@ -330,5 +330,8 @@ def get_database(db_path: str = None) -> DatabaseManager:
     # 使用SQLite（默认）
     print("📁 使用SQLite数据库")
     if _db_manager is None:
-        _db_manager = DatabaseManager(db_path)
+        # 统一使用项目根目录的 user_data.db，避免进程工作目录不同导致读写不同数据库
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        sqlite_path = db_path or os.path.join(project_root, 'user_data.db')
+        _db_manager = DatabaseManager(sqlite_path)
     return _db_manager
