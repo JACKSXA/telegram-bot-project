@@ -296,18 +296,27 @@ def analytics():
     # 转化率计算
     total = len(sessions)
     if total > 0:
-        # 统一状态统计
+        # 统一状态统计（匹配漏斗显示逻辑）
         wallet_bound = sum(1 for u in sessions.values() if u.get('wallet'))
+        # 等待客服：包括 waiting_customer_service 和 waiting
         waiting_cs = sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting'])
+        # 已绑定：包括 bound_and_ready, bound, completed
         bound_ready = sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed'])
+        # 转账完成：检查 transfer_completed 字段
         transfer_completed = sum(1 for u in sessions.values() if u.get('transfer_completed', False))
         
+        # 钱包绑定数：所有有钱包的用户（无论状态）
+        wallet_bound_count = wallet_bound
+        
         conversion_rates = {
-            'to_wallet': (wallet_bound / total * 100) if total else 0,
+            'to_wallet': (wallet_bound_count / total * 100) if total else 0,
             'to_service': (waiting_cs / total * 100) if total else 0,
             'to_bound': (bound_ready / total * 100) if total else 0,
             'to_transfer': (transfer_completed / total * 100) if total else 0
         }
+        
+        # 调试输出
+        logger.info(f"转化漏斗统计: 总用户={total}, 钱包={wallet_bound_count}, 等待客服={waiting_cs}, 已绑定={bound_ready}, 转账={transfer_completed}")
     else:
         conversion_rates = {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0}
     

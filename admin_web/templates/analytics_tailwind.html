@@ -81,12 +81,21 @@
                     {% set wallet_verified_count = data.state_distribution.get('wallet_verified', 0) %}
                     {% set bound_ready_count = data.state_distribution.get('bound_and_ready', 0) + data.state_distribution.get('bound', 0) %}
                     {% set waiting_cs_count = data.state_distribution.get('waiting_customer_service', 0) + data.state_distribution.get('waiting', 0) %}
+                    {% set transfer_done_count = data.state_distribution.get('transfer_completed', 0) %}
+                    
+                    {# 计算钱包绑定数量 #}
+                    {% set wallet_bound_count = 0 %}
+                    {% for state, count in data.state_distribution.items() %}
+                        {% if state in ['wallet_verified', 'verified', 'bound_and_ready', 'bound', 'completed', 'waiting_customer_service'] %}
+                            {% set wallet_bound_count = wallet_bound_count + count %}
+                        {% endif %}
+                    {% endfor %}
                     
                     {% set steps = [
                         ('注册用户', data.total_users, 'blue'),
-                        ('已绑定钱包', wallet_verified_count + bound_ready_count, 'green'),
+                        ('已绑定钱包', wallet_bound_count, 'green'),
                         ('等待客服', waiting_cs_count, 'yellow'),
-                        ('转账完成', completed_count, 'pink')
+                        ('转账完成', transfer_done_count, 'pink')
                     ] %}
                     
                     {% for step in steps %}
