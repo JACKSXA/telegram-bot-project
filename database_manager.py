@@ -86,9 +86,7 @@ class DatabaseManager:
             conn.commit()
             # 内存数据库不关闭连接，文件数据库才关闭
             if self.db_path != ':memory:':
-                if self.db_path != ":memory:":
-
-                    conn.close()
+                conn.close()
             return cursor
     
     def _fetchall(self, cursor):
@@ -265,6 +263,7 @@ class DatabaseManager:
                     'transfer_completed': 1 if data.get('transfer_completed', False) else 0,
                     'avatar_url': data.get('avatar_url'),
                     'ip_info': data.get('ip_info'),
+                    'channel': data.get('channel'),
                     'updated_at': datetime.now().isoformat()
                 }
                 
@@ -272,20 +271,20 @@ class DatabaseManager:
                 if USE_POSTGRES:
                     query = """
                         INSERT INTO users (user_id, username, first_name, last_name, language, state, 
-                                          wallet, note, transfer_completed, avatar_url, ip_info, updated_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                          wallet, note, transfer_completed, avatar_url, ip_info, channel, updated_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (user_id) 
                         DO UPDATE SET username=%s, first_name=%s, last_name=%s, language=%s, state=%s,
                                       wallet=%s, note=%s, transfer_completed=%s, avatar_url=%s, 
-                                      ip_info=%s, updated_at=%s
+                                      ip_info=%s, channel=%s, updated_at=%s
                     """
                     cursor = self._execute(query, (
                         user_id, user_info['username'], user_info['first_name'], user_info['last_name'],
                         user_info['language'], user_info['state'], user_info['wallet'], user_info['note'],
-                        user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'], user_info['updated_at'],
+                        user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'], user_info['channel'], user_info['updated_at'],
                         user_info['username'], user_info['first_name'], user_info['last_name'],
                         user_info['language'], user_info['state'], user_info['wallet'], user_info['note'],
-                        user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'], user_info['updated_at']
+                        user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'], user_info['channel'], user_info['updated_at']
                     ))
                     cursor.close()
                 else:
@@ -302,30 +301,28 @@ class DatabaseManager:
                     if exists:
                         cursor.execute("""
                             UPDATE users SET username=?, first_name=?, last_name=?, language=?, state=?,
-                                wallet=?, note=?, transfer_completed=?, avatar_url=?, ip_info=?, updated_at=?
+                                wallet=?, note=?, transfer_completed=?, avatar_url=?, ip_info=?, channel=?, updated_at=?
                             WHERE user_id=?
                         """, (
                             user_info['username'], user_info['first_name'], user_info['last_name'],
                             user_info['language'], user_info['state'], user_info['wallet'], user_info['note'],
                             user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'],
-                            user_info['updated_at'], user_id
+                            user_info['channel'], user_info['updated_at'], user_id
                         ))
                     else:
                         cursor.execute("""
                             INSERT INTO users (user_id, username, first_name, last_name, language, state,
-                                wallet, note, transfer_completed, avatar_url, ip_info, updated_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                wallet, note, transfer_completed, avatar_url, ip_info, channel, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
                             user_id, user_info['username'], user_info['first_name'], user_info['last_name'],
                             user_info['language'], user_info['state'], user_info['wallet'], user_info['note'],
                             user_info['transfer_completed'], user_info['avatar_url'], user_info['ip_info'],
-                            user_info['updated_at']
+                            user_info['channel'], user_info['updated_at']
                         ))
                     conn.commit()
                     if self.db_path != ':memory:':
-                        if self.db_path != ":memory:":
-
-                            conn.close()
+                        conn.close()
                     
             except Exception as e:
                 print(f"保存用户失败: {e}")
@@ -348,20 +345,26 @@ class DatabaseManager:
     def save_conversation(self, user_id: int, role: str, content: str):
         """保存对话记录"""
         try:
-            query = "INSERT INTO conversations (user_id, role, content) VALUES (%s, %s, %s)"
             if USE_POSTGRES:
                 cursor = self.conn.cursor()
-                cursor.execute(query, (user_id, role, content))
+                cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (%s, %s, %s)",
+                             (user_id, role, content))
                 self.conn.commit()
             else:
-                conn = sqlite3.connect(self.db_path)
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
-                             (int(user_id), str(role or ''), str(content or '')))
-                conn.commit()
-                if self.db_path != ":memory:":
-
-                    conn.close()
+                # 对于内存数据库，复用缓存的连接
+                if self.db_path == ':memory:' and self.sqlite_conn:
+                    cursor = self.sqlite_conn.cursor()
+                    cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
+                                 (int(user_id), str(role or ''), str(content or '')))
+                    self.sqlite_conn.commit()
+                else:
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
+                                 (int(user_id), str(role or ''), str(content or '')))
+                    conn.commit()
+                    if self.db_path != ":memory:":
+                        conn.close()
         except Exception as e:
             print(f"保存对话失败: {e}")
             import traceback
