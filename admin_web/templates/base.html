@@ -14,14 +14,15 @@
     
     <style>
         :root {
-            /* 品牌色 */
-            --primary: #667eea;
-            --primary-dark: #764ba2;
-            --secondary: #6c757d;
-            --success: #10b981;
-            --info: #3b82f6;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            /* 品牌色 - 使用更柔和的配色 */
+            --primary: #4f46e5;        /* Indigo (更深的蓝紫) */
+            --primary-dark: #4338ca;   /* 深Indigo */
+            --primary-light: #6366f1;  /* 浅Indigo */
+            --secondary: #6b7280;      /* Gray */
+            --success: #059669;        /* Emerald */
+            --info: #0369a1;           /* Sky Blue */
+            --warning: #d97706;        /* Amber */
+            --danger: #dc2626;         /* Red */
             
             /* 布局 */
             --sidebar-width: 200px;
@@ -153,7 +154,7 @@
         .main-content {
             margin-left: 200px;  /* 固定200px，匹配侧边栏宽度 */
             min-height: 100vh;
-            background: #f8fafc;
+            background: #f1f5f9;  /* 更柔和的灰蓝色背景 */
         }
 
         /* 内容容器 - 带padding */
@@ -387,6 +388,53 @@
         .btn-outline-secondary:hover {
             background: #f9fafb;
             border-color: #d1d5db;
+        }
+
+        /* 下拉框优化 */
+        select.form-select,
+        select.form-control {
+            background-color: var(--gray-50);
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-sm);
+            transition: all 0.2s;
+        }
+
+        select.form-select:focus,
+        select.form-control:focus {
+            background-color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        select.form-select:hover,
+        select.form-control:hover {
+            border-color: var(--gray-400);
+        }
+
+        /* 输入框优化 */
+        input.form-control {
+            background-color: var(--gray-50);
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-sm);
+            transition: all 0.2s;
+        }
+
+        input.form-control:focus {
+            background-color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        input.form-control:hover:not(:focus) {
+            border-color: var(--gray-400);
         }
 
         /* 表格 */
