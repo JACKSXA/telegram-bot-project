@@ -224,6 +224,56 @@
     </div>
 </div>
 
+<!-- 保存模板确认对话框 -->
+<div id="saveTemplateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 mx-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                <i class="fas fa-save mr-2 text-blue-600"></i> 保存为模板
+            </h3>
+            <button onclick="closeSaveTemplateModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                模板名称
+            </label>
+            <input 
+                type="text" 
+                id="templateNameInput" 
+                placeholder="请输入模板名称"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                消息内容预览
+            </label>
+            <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600 max-h-32 overflow-y-auto">
+                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap" id="templatePreview"></p>
+            </div>
+        </div>
+        
+        <div class="flex gap-3">
+            <button 
+                onclick="closeSaveTemplateModal()"
+                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium"
+            >
+                取消
+            </button>
+            <button 
+                onclick="confirmSaveTemplate()"
+                class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+                <i class="fas fa-check mr-2"></i> 确认保存
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function updateTargetInfo() {
     const targetType = document.getElementById('target_type').value;
@@ -334,13 +384,29 @@ function loadTemplate() {
 function saveAsTemplate() {
     const content = document.getElementById('messageContent').value;
     if (!content.trim()) {
-        alert('请先输入消息内容');
+        showToast('请先输入消息内容', true);
         return;
     }
     
-    const name = prompt('输入模板名称:');
-    if (!name) return;
+    // 显示确认对话框
+    document.getElementById('templatePreview').textContent = content;
+    document.getElementById('templateNameInput').value = '';
+    document.getElementById('saveTemplateModal').classList.remove('hidden');
+}
+
+function closeSaveTemplateModal() {
+    document.getElementById('saveTemplateModal').classList.add('hidden');
+}
+
+function confirmSaveTemplate() {
+    const name = document.getElementById('templateNameInput').value.trim();
+    if (!name) {
+        showToast('请输入模板名称', true);
+        document.getElementById('templateNameInput').focus();
+        return;
+    }
     
+    const content = document.getElementById('messageContent').value;
     const type = document.querySelector('input[name="push_type"]:checked')?.value || 'text';
     
     fetch('/api/templates', {
@@ -353,6 +419,7 @@ function saveAsTemplate() {
         if (data.success) {
             showToast('模板保存成功！', false);
             loadTemplates();
+            closeSaveTemplateModal();
         } else {
             showToast('保存失败：' + (data.error || '未知错误'), true);
         }
