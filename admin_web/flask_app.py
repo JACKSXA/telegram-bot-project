@@ -133,7 +133,7 @@ def load_sessions():
         
         return sessions
     except Exception as e:
-    logger.error(f"加载会话失败: {e}")
+        logger.error(f"加载会话失败: {e}")
         return {}
 
 def save_sessions(sessions):

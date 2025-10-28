@@ -13,6 +13,7 @@ import os
 import json
 import re
 import logging
+from logging.handlers import RotatingFileHandler
 import threading
 from datetime import datetime
 from typing import Dict, Optional, Tuple
@@ -49,12 +50,22 @@ from database_manager import get_database
 # 加载环境变量
 load_dotenv()
 
-# 配置日志
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+# 配置日志（控制台 + 滚动文件 logs/bot.log）
+logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
+logger = logging.getLogger('tg_bot')
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    file_handler = RotatingFileHandler(os.path.join(logs_dir, 'bot.log'), maxBytes=2*1024*1024, backupCount=3, encoding='utf-8')
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
 # ==================== 配置 ====================
 

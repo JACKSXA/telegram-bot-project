@@ -1,0 +1,23 @@
+# 如何获取PostgreSQL完整连接URL
+
+## 方法1：从Railway环境变量获取
+
+在Railway Dashboard中：
+1. 点击Postgres服务
+2. 点击Variables标签
+3. 找到 DATABASE_URL
+4. 复制完整的值
+
+## 方法2：从Connect页面获取
+
+1. 点击Postgres服务
+2. 点击Connect或"Connection"标签
+3. 应该会显示完整的连接字符串
+
+## 完整URL的格式：
+
+postgresql://postgres:PASSWORD@caboose.proxy.rlwy.net:38799/railway
+
+其中PASSWORD是您的数据库密码
+
+请复制完整的URL给我！

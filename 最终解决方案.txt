@@ -1,0 +1,24 @@
+# 最终解决方案
+
+## 问题确认
+1. Bot在Railway使用 SQLite (user_data.db)
+2. Web在Render使用SQLite (admin_web/user_data.db)
+3. 两个文件不共享 → Web看不到数据
+
+## 解决方案（必须执行）
+
+### 方案A：配置PostgreSQL（推荐）
+
+#### 1. 在Railway的Worker服务中添加：
+   DATABASE_URL = postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+
+#### 2. 获取PostgreSQL外部地址用于Render：
+   在Postgres服务 → Connect → Public Network → 复制URL
+
+#### 3. 在Render的Web服务中添加：
+   DATABASE_URL = (PostgreSQL外部URL)
+
+### 方案B：使用同一个数据库文件（临时）
+
+将根目录的user_data.db复制到admin_web目录
+

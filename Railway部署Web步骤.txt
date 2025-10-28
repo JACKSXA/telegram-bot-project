@@ -1,0 +1,27 @@
+在Railway添加Web服务：
+
+1. 打开Railway Dashboard
+2. 点击项目
+3. 点击"+ New"
+4. 选择"GitHub Repo"
+5. 搜索并选择：telegram-bot-project
+6. Railway会自动检测Procfile中的web服务
+
+如果Railway没有自动创建web服务：
+
+7. 手动添加：
+   - 点击"+ New" → "Empty Service"
+   - Name: web-admin
+   - 在Source中连接GitHub仓库
+   - 在Settings中设置Start Command：
+     cd admin_web && gunicorn -w 1 -b 0.0.0.0:$PORT flask_app:app
+
+8. 添加环境变量：
+   TELEGRAM_BOT_TOKEN
+   DEEPSEEK_API_KEY  
+   ADMIN_GROUP_ID
+   DATABASE_URL (PostgreSQL的连接地址)
+
+9. 保存并等待部署
+
+完成后，访问Railway给你的Web服务URL就能看到用户数据了！

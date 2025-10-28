@@ -1,0 +1,20 @@
+# Railway环境变量正确格式
+
+## 在Railway Dashboard中：
+
+Variable Name: DATABASE_URL
+Variable Value: postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+
+## 重要检查项：
+1. ✅ 变量名必须是 DATABASE_URL
+2. ✅ 变量值要完整（从postgresql://开始到结束）
+3. ✅ 不要有多余的引号
+4. ✅ 不要有前导或尾随空格
+
+## 检查日志
+查看Worker服务的Logs，应该能看到：
+- psycopg2连接错误的具体信息
+- 可能是"could not connect to server"
+- 或者是"authentication failed"
+
+请检查Worker服务的Logs，发给我具体的错误信息！

@@ -1,0 +1,28 @@
+# ⚠️ 必须配置PostgreSQL
+
+## 为什么必须配置？
+
+1. Bot和Web在不同的服务器
+2. SQLite文件无法跨服务器共享
+3. 必须使用PostgreSQL或其他云数据库
+
+## 📋 立即配置步骤
+
+### 1. Railway - Worker服务
+添加环境变量：
+DATABASE_URL = postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+
+### 2. 获取PostgreSQL外部地址
+Railway → Postgres服务 → Connect → Public Network
+复制URL（类似：postgresql://postgres:pass@containers-us-west-xxx.railway.app:5432/railway）
+
+### 3. Render - Web服务  
+添加环境变量：
+DATABASE_URL = (刚才复制的PostgreSQL外部URL)
+
+## ⏰ 完成后
+- Bot和Web共享同一个PostgreSQL数据库
+- 数据实时同步
+- 问题彻底解决
+
+**请配置PostgreSQL！** 🚨

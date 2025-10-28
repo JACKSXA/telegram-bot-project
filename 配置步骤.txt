@@ -1,0 +1,14 @@
+步骤4：在Railway添加PostgreSQL连接
+
+1. 打开Worker服务
+2. Settings → Variables
+3. 添加：
+   DATABASE_URL = postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+4. 点击Save
+
+如果Web服务也在Railway：
+5. 打开Web服务
+6. 添加相同的DATABASE_URL
+7. 保存
+
+等待Railway重新部署后，Bot和Web就会共享同一个PostgreSQL数据库了！

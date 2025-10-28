@@ -1,0 +1,33 @@
+# PostgreSQL配置说明
+
+## 分析
+
+提供的地址：
+postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+
+这是内部地址（railway.internal），只能在同一Railway项目内访问。
+
+## 对于Railway的Worker服务：
+
+✅ 可以使用内部地址
+postgresql://postgres:moMItSdJzQuFkarnqTDqnsCnTBODFzQB@postgres.railway.internal:5432/railway
+
+## 对于Render的Web服务：
+
+❌ 不能使用内部地址
+需要外部地址：caboose.proxy.rlwy.net:38799
+
+## 解决方案
+
+### 方案1：在Railway部署Web服务
+把Web服务也部署到Railway，使用内部PostgreSQL
+
+### 方案2：启用PostgreSQL的Public Network
+在Railway的Postgres服务中启用Public Network访问
+
+## 您需要做什么？
+
+**选项A**：让我在Railway部署Web服务（推荐）
+**选项B**：在Railway启用PostgreSQL的Public Network
+
+您选哪个？
