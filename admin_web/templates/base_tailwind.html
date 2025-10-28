@@ -192,6 +192,43 @@
                         </ul>
                     </div>
 
+                    <!-- Advanced Features -->
+                    <div class="mb-4 mt-4">
+                        <h3 class="mb-3 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">高级功能</h3>
+                        <ul class="flex flex-col gap-1">
+                            <li>
+                                <a 
+                                    href="/ab-test" 
+                                    x-bind:class="currentPath === '/ab-test' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-flask w-5"></i>
+                                    <span>A/B测试</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="/journey" 
+                                    x-bind:class="currentPath === '/journey' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-route w-5"></i>
+                                    <span>营销旅程</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="/ad" 
+                                    x-bind:class="currentPath === '/ad' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-megaphone w-5"></i>
+                                    <span>广告管理</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                     <!-- Dark Mode Toggle -->
                     <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button 
