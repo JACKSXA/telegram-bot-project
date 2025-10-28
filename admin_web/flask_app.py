@@ -300,7 +300,7 @@ def users():
             'ip_info': data.get('ip_info')
         })
     
-    return render_template('users.html', users=users_list)
+    return render_template('users_tailwind.html', users=users_list)
 
 @app.route('/user/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):

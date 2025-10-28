@@ -1,0 +1,224 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}用户管理 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">用户管理</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">管理所有机器人用户</p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 mb-6 px-6 py-5">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="md:col-span-2">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="搜索用户ID、用户名、钱包地址..." 
+                        oninput="filterTable()"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select 
+                    id="filterLanguage" 
+                    onchange="filterTable()"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                    <option value="">所有语言</option>
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                </select>
+                <select 
+                    id="filterState" 
+                    onchange="filterTable()"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                    <option value="">所有状态</option>
+                    <option value="idle">空闲</option>
+                    <option value="waiting_wallet">等待钱包</option>
+                    <option value="wallet_verified">已验证</option>
+                    <option value="waiting_transfer">等待转账</option>
+                    <option value="completed">已完成</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users List -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 overflow-hidden">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-list mr-2"></i> 用户列表
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">用户</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">地区</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">语言</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">钱包</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">状态</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">操作</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for user in users %}
+                    <tr 
+                        class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        data-userid="{{ user.user_id }}"
+                        data-wallet="{{ user.wallet or '' }}"
+                    >
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                {% if user.avatar_url %}
+                                    <img src="{{ user.avatar_url }}" alt="Avatar" class="h-10 w-10 rounded-full border-2 border-gray-200 dark:border-gray-700 object-cover">
+                                {% else %}
+                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                        <span class="text-white font-bold">{{ (user.username or user.first_name or 'N')[0].upper() }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ user.username or 'N/A' }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ user.user_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% set ip_info = user.ip_info|from_json if user.ip_info else {} %}
+                            <span class="text-sm text-gray-900 dark:text-white">{{ ip_info.get('region', '🌍 未知') }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' if user.language == 'zh' else 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                                {% if user.language == 'zh' %}中文{% else %}English{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if user.wallet %}
+                                <code class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">{{ user.wallet[:20] }}...</code>
+                            {% else %}
+                                <span class="text-gray-400 dark:text-gray-500">未绑定</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium 
+                                {% if user.state == 'completed' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif user.state == 'waiting_transfer' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% elif user.state == 'wallet_verified' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                {% elif user.state == 'waiting_wallet' %}bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                                {% if user.state == 'completed' %}已完成
+                                {% elif user.state == 'waiting_transfer' %}等待转账
+                                {% elif user.state == 'wallet_verified' %}已验证
+                                {% elif user.state == 'waiting_wallet' %}等待钱包
+                                {% else %}空闲{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <button 
+                                onclick="deleteUser({{ user.user_id }})"
+                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                            >
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateAvatarColor(username) {
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', 
+        '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+        '#F1948A', '#82E0AA', '#F7DC6F', '#F8C471'
+    ];
+    
+    if (!username || username === 'N/A' || username === 'None') {
+        username = 'N';
+    }
+    
+    const firstChar = username.charAt(0).toUpperCase();
+    const colorIndex = firstChar.charCodeAt(0) % colors.length;
+    
+    return {
+        color: colors[colorIndex],
+        initial: firstChar
+    };
+}
+
+function filterTable() {
+    const input = document.getElementById('searchInput');
+    const searchText = input.value.toLowerCase();
+    const filterLanguage = document.getElementById('filterLanguage').value;
+    const filterState = document.getElementById('filterState').value;
+    
+    const table = document.querySelector('table tbody');
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const userid = row.getAttribute('data-userid');
+        const wallet = row.getAttribute('data-wallet');
+        const searchMatch = searchText === '' || 
+            (userid + ' ' + wallet).toLowerCase().includes(searchText) ||
+            row.textContent.toLowerCase().includes(searchText);
+        
+        const languageCell = row.cells[2];
+        const language = languageCell?.textContent || '';
+        const languageMatch = filterLanguage === '' || language.includes(filterLanguage === 'zh' ? '中文' : 'English');
+        
+        const stateCell = row.cells[4];
+        const state = stateCell?.textContent || '';
+        const stateMatch = filterState === '' || state.toLowerCase().includes(filterState.toLowerCase());
+        
+        if (searchMatch && languageMatch && stateMatch) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function deleteUser(userId) {
+    if (!confirm('确定要删除这个用户吗？此操作不可恢复！')) {
+        return;
+    }
+    
+    fetch(`/user/${userId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('用户已删除');
+            location.reload();
+        } else {
+            alert('删除失败: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('删除失败: ' + error);
+    });
+}
+</script>
+{% endblock %}
+
