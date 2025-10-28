@@ -75,12 +75,6 @@
                 </h3>
             </div>
             <div class="p-6">
-                <!-- 调试输出 -->
-                <div class="mb-4 p-3 bg-yellow-100 text-xs">
-                    DEBUG: wallet_bound={{ data.get('wallet_bound', 'N/A') }}, 
-                    waiting_cs={{ data.get('waiting_cs', 'N/A') }}, 
-                    transfer_completed={{ data.get('transfer_completed', 'N/A') }}
-                </div>
                 <div class="space-y-4">
                     {# 使用数据库直采快照，确保数据同步 #}
                     {% set wallet_bound_count = data.get('wallet_bound', 0) %}
