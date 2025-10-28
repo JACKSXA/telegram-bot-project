@@ -586,8 +586,24 @@ def push():
                 except ValueError:
                     pass
         elif target_type == 'all':
-            # 全部用户
-            user_list = list(sessions.keys())
+            # 全部用户（真实互动过的）
+            user_list = [uid for uid, data in sessions.items() 
+                        if data.get('username') or data.get('first_name') or data.get('note')]
+        elif target_type == 'idle':
+            # 初始化用户
+            for user_id, data in sessions.items():
+                if data.get('state') in ['idle', 'init']:
+                    user_list.append(user_id)
+        elif target_type == 'wallet_waiting':
+            # 等待钱包用户
+            for user_id, data in sessions.items():
+                if data.get('state') in ['waiting_wallet', 'wallet_waiting']:
+                    user_list.append(user_id)
+        elif target_type == 'verified':
+            # 已验证用户
+            for user_id, data in sessions.items():
+                if data.get('state') in ['wallet_verified', 'verified']:
+                    user_list.append(user_id)
         elif target_type == 'waiting':
             # 等待客服的用户
             for user_id, data in sessions.items():
@@ -658,18 +674,21 @@ def push():
         })
     
     # GET请求：渲染推送页面
-    # 获取各个状态的用户数量
+    # 获取各个状态的用户数量（真实用户，排除只初始化未互动的）
+    valid_sessions = {uid: data for uid, data in sessions.items() 
+                      if data.get('username') or data.get('first_name') or data.get('note')}
+    
     stats = {
-        'all': len(sessions),
-        'waiting': sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting']),
-        'bound': sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed']),
-        'transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False)),
-        'idle': sum(1 for u in sessions.values() if u.get('state') in ['idle', 'init']),
-        'verified': sum(1 for u in sessions.values() if u.get('state') in ['wallet_verified', 'verified']),
-        'wallet_waiting': sum(1 for u in sessions.values() if u.get('state') in ['waiting_wallet', 'wallet_waiting'])
+        'all': len(valid_sessions),  # 只统计真实互动过的用户
+        'waiting': sum(1 for u in valid_sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting']),
+        'bound': sum(1 for u in valid_sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed']),
+        'transfer_completed': sum(1 for u in valid_sessions.values() if u.get('transfer_completed', False)),
+        'idle': sum(1 for u in valid_sessions.values() if u.get('state') in ['idle', 'init']),
+        'verified': sum(1 for u in valid_sessions.values() if u.get('state') in ['wallet_verified', 'verified']),
+        'wallet_waiting': sum(1 for u in valid_sessions.values() if u.get('state') in ['waiting_wallet', 'wallet_waiting'])
     }
     
-    return render_template('push_tailwind.html', stats=stats, users=sessions)
+    return render_template('push_tailwind.html', stats=stats, users=valid_sessions)
 
 @app.route('/ad', methods=['GET', 'POST'])
 def ad():

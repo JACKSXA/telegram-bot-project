@@ -35,8 +35,11 @@
                                 onchange="updateTargetInfo()"
                             >
                                 <option value="all">全部用户 ({{ stats.all }})</option>
-                                <option value="waiting">等待客服的用户 ({{ stats.waiting }})</option>
-                                <option value="bound">已绑定的用户 ({{ stats.bound }})</option>
+                                <option value="idle">初始化用户 ({{ stats.idle }})</option>
+                                <option value="wallet_waiting">等待钱包用户 ({{ stats.wallet_waiting }})</option>
+                                <option value="verified">已验证用户 ({{ stats.verified }})</option>
+                                <option value="waiting">等待客服用户 ({{ stats.waiting }})</option>
+                                <option value="bound">已绑定用户 ({{ stats.bound }})</option>
                                 <option value="selected">精确推送（指定用户ID）</option>
                             </select>
                         </div>
