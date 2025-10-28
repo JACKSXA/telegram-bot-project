@@ -13,13 +13,30 @@ import os
 import sys
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_session import Session
 import requests
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
+# 统一日志：控制台 + 滚动文件
+logs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
+logger = logging.getLogger('flask_app')
+logger.setLevel(logging.INFO)
+
+if not logger.handlers:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    file_handler = RotatingFileHandler(os.path.join(logs_dir, 'flask_app.log'), maxBytes=2*1024*1024, backupCount=3, encoding='utf-8')
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
 # 添加父目录到路径，以便导入 database_manager
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -82,9 +99,9 @@ def from_json_filter(value):
 # 初始化数据库（启动时执行）
 try:
     users = db.get_all_users()
-    print(f"✅ 数据库已加载，当前有 {len(users)} 个用户")
+    logger.info(f"✅ 数据库已加载，当前有 {len(users)} 个用户")
 except Exception as e:
-    print(f"❌ 数据库加载失败: {e}")
+    logger.error(f"❌ 数据库加载失败: {e}")
     import traceback
     traceback.print_exc()
 
@@ -116,7 +133,7 @@ def load_sessions():
         
         return sessions
     except Exception as e:
-        print(f"加载会话失败: {e}")
+    logger.error(f"加载会话失败: {e}")
         return {}
 
 def save_sessions(sessions):
@@ -135,7 +152,7 @@ def save_sessions(sessions):
             }
             db.save_user(user_id, user_info)
     except Exception as e:
-        print(f"保存会话失败: {e}")
+        logger.error(f"保存会话失败: {e}")
 
 def send_telegram_message(user_id, message):
     """发送Telegram消息"""
@@ -149,7 +166,7 @@ def send_telegram_message(user_id, message):
         response = requests.post(url, json=payload, timeout=10)
         return response.status_code == 200
     except Exception as e:
-        print(f"发送消息失败: {e}")
+        logger.error(f"发送消息失败: {e}")
         return False
 
 # ==================== 路由 ====================
@@ -309,7 +326,26 @@ def users():
             'ip_info': data.get('ip_info')
         })
     
-    return render_template('users_tailwind.html', users=users_list, filter_state=filter_state)
+    # 服务端分页
+    try:
+        page = max(1, int(request.args.get('page', '1') or '1'))
+        per_page = min(100, max(5, int(request.args.get('per_page', '20') or '20')))
+    except ValueError:
+        page, per_page = 1, 20
+    total = len(users_list)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    start = (page - 1) * per_page
+    end = start + per_page
+    users_page = users_list[start:end]
+    pagination = {
+        'page': page,
+        'per_page': per_page,
+        'total': total,
+        'total_pages': total_pages,
+        'has_prev': page > 1,
+        'has_next': page < total_pages,
+    }
+    return render_template('users_tailwind.html', users=users_page, filter_state=filter_state, pagination=pagination)
 
 @app.route('/user/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):
@@ -335,7 +371,7 @@ def delete_user(user_id):
             
         return jsonify({'success': True})
     except Exception as e:
-        print(f"删除用户失败: {e}")
+        logger.error(f"删除用户失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/user/<int:user_id>')
@@ -355,7 +391,7 @@ def user_detail(user_id):
         conversations = db.get_conversations(user_id, limit=100)
         user_data['history'] = conversations
     except Exception as e:
-        print(f"获取对话历史失败: {e}")
+        logger.error(f"获取对话历史失败: {e}")
         user_data['history'] = []
     
     # 获取钱包信息
@@ -364,7 +400,7 @@ def user_detail(user_id):
         if wallet_info:
             user_data['wallet_info'] = wallet_info
     except Exception as e:
-        print(f"获取钱包信息失败: {e}")
+        logger.error(f"获取钱包信息失败: {e}")
         user_data['wallet_info'] = {}
     
     # 转换为模板需要的格式
@@ -390,11 +426,11 @@ def user_history(user_id):
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
     try:
         conversations = db.get_conversations(user_id, limit=200)
-        print(f"[HISTORY] fetch {user_id} -> {len(conversations)} rows")
+        logger.info(f"[HISTORY] fetch {user_id} -> {len(conversations)} rows")
         # 合并旧 sessions 历史，避免因Bot未入库导致缺失
         sessions = load_sessions()
         sessions_hist = (sessions.get(user_id, {}) or {}).get('history', [])
-        print(f"[HISTORY] sessions -> {len(sessions_hist)} rows")
+        logger.info(f"[HISTORY] sessions -> {len(sessions_hist)} rows")
         merged = []
         # 标准化结构
         for m in conversations:
@@ -416,7 +452,7 @@ def user_history(user_id):
         dedup.sort(key=sort_key)
         return jsonify({'success': True, 'history': dedup[-200:]})
     except Exception as e:
-        print(f"[HISTORY][ERROR] {e}")
+        logger.error(f"[HISTORY][ERROR] {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/user/<int:user_id>/update', methods=['POST'])
@@ -460,7 +496,7 @@ def send_user_message(user_id):
         try:
             db.save_conversation(user_id, 'assistant', message)
         except Exception as e:
-            print(f"保存管理员发送对话失败: {e}")
+            logger.error(f"保存管理员发送对话失败: {e}")
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Failed to send message'})

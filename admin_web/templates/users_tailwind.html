@@ -10,6 +10,33 @@
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">管理所有机器人用户</p>
     </div>
 
+    {% if pagination %}
+    <!-- Pagination -->
+    <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            共 {{ pagination.total }} 条 · 第 {{ pagination.page }} / {{ pagination.total_pages }} 页
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/users?page=1&per_page={{ pagination.per_page }}{% if filter_state %}&state={{ filter_state }}{% endif %}"
+               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">首页</a>
+            {% if pagination.has_prev %}
+            <a href="/users?page={{ pagination.page - 1 }}&per_page={{ pagination.per_page }}{% if filter_state %}&state={{ filter_state }}{% endif %}"
+               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">上一页</a>
+            {% else %}
+            <span class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">上一页</span>
+            {% endif %}
+            {% if pagination.has_next %}
+            <a href="/users?page={{ pagination.page + 1 }}&per_page={{ pagination.per_page }}{% if filter_state %}&state={{ filter_state }}{% endif %}"
+               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">下一页</a>
+            {% else %}
+            <span class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">下一页</span>
+            {% endif %}
+            <a href="/users?page={{ pagination.total_pages }}&per_page={{ pagination.per_page }}{% if filter_state %}&state={{ filter_state }}{% endif %}"
+               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">末页</a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Search and Filter -->
     <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 mb-6 px-6 py-5">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
