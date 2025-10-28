@@ -22,7 +22,7 @@
                     </h3>
                 </div>
                 <div class="p-8">
-                    <form method="POST" id="pushForm">
+                    <form method="POST" id="pushForm" onsubmit="handlePushSubmit(event)">
                         <!-- Target Users -->
                         <div class="mb-8">
                             <label class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -255,6 +255,56 @@ function previewMessage() {
 function closePreviewModal() {
     const modal = document.getElementById('previewModal');
     if (modal) modal.remove();
+}
+
+// 处理推送表单提交
+function handlePushSubmit(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('pushForm');
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    
+    // 禁用按钮
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 发送中...';
+    
+    fetch('/push', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`成功发送 ${data.sent}/${data.total} 条消息`, false);
+            // 3秒后清空表单
+            setTimeout(() => {
+                form.reset();
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> 立即推送';
+            }, 3000);
+        } else {
+            showToast('推送失败：' + (data.error || '未知错误'), true);
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> 立即推送';
+        }
+    })
+    .catch(err => {
+        showToast('推送失败：' + err, true);
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> 立即推送';
+    });
+}
+
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `${isError ? 'bg-red-500' : 'bg-green-500'} fixed top-20 right-6 text-white px-6 py-4 rounded-lg shadow-xl z-50 flex items-center gap-2 animate-slide-in`;
+    toast.innerHTML = `
+        <i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
 }
 </script>
 {% endblock %}

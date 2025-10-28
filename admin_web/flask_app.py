@@ -565,6 +565,9 @@ def push():
         target_type = request.form.get('target_type', 'all')
         target_users = request.form.get('target_users', '')  # 指定用户ID
         
+        if not message or not message.strip():
+            return jsonify({'success': False, 'error': '消息内容不能为空'}), 400
+        
         sent_count = 0
         failed_count = 0
         
@@ -594,6 +597,10 @@ def push():
                 if data.get('state') == 'bound_and_ready':
                     user_list.append(user_id)
         
+        # 如果没有用户，返回错误
+        if not user_list:
+            return jsonify({'success': False, 'error': f'未找到符合条件的用户（筛选类型: {target_type}）'}), 400
+        
         # 发送消息
         results = []
         for user_id in user_list:
@@ -611,9 +618,11 @@ def push():
                     results.append({'user_id': user_id, 'status': 'success'})
                 else:
                     failed_count += 1
-                    results.append({'user_id': user_id, 'status': 'failed'})
+                    results.append({'user_id': user_id, 'status': 'failed', 'error': 'Telegram API返回失败'})
             except Exception as e:
                 logger.error(f"发送消息给用户 {user_id} 失败: {e}")
+                import traceback
+                traceback.print_exc()
                 failed_count += 1
                 results.append({'user_id': user_id, 'status': 'failed', 'error': str(e)})
         
@@ -629,16 +638,22 @@ def push():
         
         # 保存到本地文件（简单记录）
         try:
-            with open('push_history.json', 'a', encoding='utf-8') as f:
+            push_log_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            push_log_file = os.path.join(push_log_dir, 'push_history.json')
+            with open(push_log_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(push_record, ensure_ascii=False) + '\n')
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"保存推送记录失败: {e}")
         
-        return render_template('push_result.html', 
-                             count=sent_count, 
-                             failed=failed_count,
-                             total=len(user_list),
-                             results=results)
+        # 返回JSON结果，而不是渲染模板
+        return jsonify({
+            'success': True,
+            'sent': sent_count,
+            'failed': failed_count,
+            'total': len(user_list),
+            'results': results,
+            'message': f'成功发送 {sent_count}/{len(user_list)} 条消息'
+        })
     
     # GET请求：渲染推送页面
     # 获取各个状态的用户数量
