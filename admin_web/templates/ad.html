@@ -3,10 +3,125 @@
 {% block title %}广告管理 - Bot管理后台{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-megaphone"></i> 广告管理</h2>
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-megaphone"></i> 广告管理</h2>
 
-<div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> 功能开发中...
+    <div class="row">
+        <!-- 广告位列表 -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-list-ul"></i> 广告位列表</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>广告位ID</th>
+                                    <th>类型</th>
+                                    <th>状态</th>
+                                    <th>展示次数</th>
+                                    <th>点击次数</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ad_welcome_001</td>
+                                    <td>欢迎消息</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>1,234</td>
+                                    <td>456</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">编辑</button>
+                                        <button class="btn btn-sm btn-info">统计</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ad_banner_001</td>
+                                    <td>横幅广告</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>5,678</td>
+                                    <td>890</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">编辑</button>
+                                        <button class="btn btn-sm btn-info">统计</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ad_popup_001</td>
+                                    <td>弹窗广告</td>
+                                    <td><span class="badge bg-secondary">停用</span></td>
+                                    <td>2,345</td>
+                                    <td>567</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">编辑</button>
+                                        <button class="btn btn-sm btn-info">统计</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> 创建新广告位
+                        </button>
+                        <div>
+                            <button class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> 导出数据
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-bar-chart"></i> 总体统计</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">总展示次数</h6>
+                        <h3 class="mb-0">9,257</h3>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">总点击次数</h6>
+                        <h3 class="mb-0">1,913</h3>
+                    </div>
+                    <div class="mb-0">
+                        <h6 class="text-muted">点击率</h6>
+                        <h3 class="mb-0">20.7%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> 使用说明</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i> 
+                            广告位用于在不同时机展示广告内容
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i> 
+                            可设置启用/停用状态
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle text-success"></i> 
+                            支持查看详细统计数据
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
-
