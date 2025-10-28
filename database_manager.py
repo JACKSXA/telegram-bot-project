@@ -324,6 +324,102 @@ class DatabaseManager:
             print(f"获取用户失败: {e}")
             return None
 
+    # ====== 分析统计：直接数据库聚合，避免内存不同步 ======
+    def get_analytics_snapshot(self) -> Dict[str, Any]:
+        """返回分析页所需的快照数据（总数、状态分布、语言分布、转化漏斗）"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                # 总用户数
+                cursor.execute("SELECT COUNT(*) FROM users")
+                total_users = cursor.fetchone()[0]
+
+                # 状态分布
+                cursor.execute("SELECT state, COUNT(*) FROM users GROUP BY state")
+                state_rows = cursor.fetchall()
+                state_distribution = {row[0] or 'unknown': row[1] for row in state_rows}
+
+                # 语言分布
+                cursor.execute("SELECT language, COUNT(*) FROM users GROUP BY language")
+                lang_rows = cursor.fetchall()
+                language_distribution = {row[0] or 'unknown': row[1] for row in lang_rows}
+
+                # 各环节统计
+                cursor.execute("SELECT COUNT(*) FROM users WHERE COALESCE(wallet, '') <> ''")
+                wallet_bound = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE state IN ('waiting_customer_service','waiting')")
+                waiting_cs = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE state IN ('bound_and_ready','bound','completed')")
+                bound_ready = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE transfer_completed = TRUE OR transfer_completed = 1")
+                transfer_completed = cursor.fetchone()[0]
+            else:
+                conn, cursor = self._get_cursor()
+                # 总用户数
+                cursor.execute("SELECT COUNT(*) FROM users")
+                total_users = cursor.fetchone()[0]
+
+                # 状态分布
+                cursor.execute("SELECT state, COUNT(*) FROM users GROUP BY state")
+                state_rows = cursor.fetchall()
+                state_distribution = {row[0] or 'unknown': row[1] for row in state_rows}
+
+                # 语言分布
+                cursor.execute("SELECT language, COUNT(*) FROM users GROUP BY language")
+                lang_rows = cursor.fetchall()
+                language_distribution = {row[0] or 'unknown': row[1] for row in lang_rows}
+
+                # 各环节统计
+                cursor.execute("SELECT COUNT(*) FROM users WHERE IFNULL(wallet, '') <> ''")
+                wallet_bound = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE state IN ('waiting_customer_service','waiting')")
+                waiting_cs = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE state IN ('bound_and_ready','bound','completed')")
+                bound_ready = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM users WHERE transfer_completed = 1")
+                transfer_completed = cursor.fetchone()[0]
+                conn.close()
+
+            # 转化率
+            if total_users > 0:
+                conversion_rates = {
+                    'to_wallet': wallet_bound / total_users * 100,
+                    'to_service': waiting_cs / total_users * 100,
+                    'to_bound': bound_ready / total_users * 100,
+                    'to_transfer': transfer_completed / total_users * 100,
+                }
+            else:
+                conversion_rates = {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0}
+
+            return {
+                'total_users': total_users,
+                'state_distribution': state_distribution,
+                'language_distribution': language_distribution,
+                'conversion_rates': conversion_rates,
+                'wallet_bound': wallet_bound,
+                'waiting_cs': waiting_cs,
+                'bound_ready': bound_ready,
+                'transfer_completed': transfer_completed,
+            }
+        except Exception as e:
+            print(f"获取分析快照失败: {e}")
+            return {
+                'total_users': 0,
+                'state_distribution': {},
+                'language_distribution': {},
+                'conversion_rates': {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0},
+                'wallet_bound': 0,
+                'waiting_cs': 0,
+                'bound_ready': 0,
+                'transfer_completed': 0,
+            }
+
 # 全局数据库管理器实例
 _db_manager = None
 

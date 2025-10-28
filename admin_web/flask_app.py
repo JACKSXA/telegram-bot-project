@@ -275,60 +275,35 @@ def api_funnel():
 
 @app.route('/analytics')
 def analytics():
-    """数据分析页面"""
+    """数据分析页面（直接从数据库统计）"""
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
-    sessions = load_sessions()
-    
-    # 状态分布统计
-    state_distribution = {}
-    for user_data in sessions.values():
-        state = user_data.get('state', 'unknown')
-        state_distribution[state] = state_distribution.get(state, 0) + 1
-    
-    # 语言分布
-    language_distribution = {}
-    for user_data in sessions.values():
-        lang = user_data.get('language', 'unknown')
-        language_distribution[lang] = language_distribution.get(lang, 0) + 1
-    
-    # 转化率计算
-    total = len(sessions)
-    if total > 0:
-        # 统一状态统计（匹配漏斗显示逻辑）
-        wallet_bound = sum(1 for u in sessions.values() if u.get('wallet'))
-        # 等待客服：包括 waiting_customer_service 和 waiting
-        waiting_cs = sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting'])
-        # 已绑定：包括 bound_and_ready, bound, completed
-        bound_ready = sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed'])
-        # 转账完成：检查 transfer_completed 字段
-        transfer_completed = sum(1 for u in sessions.values() if u.get('transfer_completed', False))
-        
-        # 钱包绑定数：所有有钱包的用户（无论状态）
-        wallet_bound_count = wallet_bound
-        
-        conversion_rates = {
-            'to_wallet': (wallet_bound_count / total * 100) if total else 0,
-            'to_service': (waiting_cs / total * 100) if total else 0,
-            'to_bound': (bound_ready / total * 100) if total else 0,
-            'to_transfer': (transfer_completed / total * 100) if total else 0
+    # 直接数据库聚合，避免内存不同步
+    try:
+        snapshot = db.get_analytics_snapshot()
+    except Exception as e:
+        logger.error(f"获取分析快照失败: {e}")
+        snapshot = {
+            'total_users': 0,
+            'state_distribution': {},
+            'language_distribution': {},
+            'conversion_rates': {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0},
         }
-        
-        # 调试输出
-        logger.info(f"转化漏斗统计: 总用户={total}, 钱包={wallet_bound_count}, 等待客服={waiting_cs}, 已绑定={bound_ready}, 转账={transfer_completed}")
-    else:
-        conversion_rates = {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0}
     
-    # 最近24小时活跃用户（简化版）
-    recent_users = sum(1 for user_data in sessions.values() if user_data.get('created_at'))
+    # 调试输出
+    logger.info(
+        f"[Analytics] total={snapshot.get('total_users')}, "
+        f"wallet={snapshot.get('wallet_bound')}, waiting_cs={snapshot.get('waiting_cs')}, "
+        f"bound={snapshot.get('bound_ready')}, transfer={snapshot.get('transfer_completed')}"
+    )
     
     analytics_data = {
-        'state_distribution': state_distribution,
-        'language_distribution': language_distribution,
-        'conversion_rates': conversion_rates,
-        'recent_users': recent_users,
-        'total_users': total
+        'state_distribution': snapshot.get('state_distribution', {}),
+        'language_distribution': snapshot.get('language_distribution', {}),
+        'conversion_rates': snapshot.get('conversion_rates', {}),
+        'recent_users': 0,
+        'total_users': snapshot.get('total_users', 0)
     }
     
     return render_template('analytics_tailwind.html', data=analytics_data)
