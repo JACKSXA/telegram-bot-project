@@ -626,8 +626,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat_type == 'private':
         try:
             db.save_conversation(user_id, 'user', user_message)
+            logger.info(f"✅ 用户消息已入库: {user_id} -> {user_message[:30]}")
         except Exception as e:
-            logger.warning(f"保存用户消息失败: {e}")
+            logger.error(f"保存用户消息失败: {e}")
+            import traceback
+            traceback.print_exc()
         # 尝试推送到管理员后台实时刷新（可选）
         try:
             pass
