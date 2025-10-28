@@ -72,32 +72,33 @@
         }
 
         body {
-            font-family: 'Nunito', sans-serif;
-            background: #f4f6f9;
-            color: #495057;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1c2128;
             overflow-x: hidden;
+            line-height: 1.5;
         }
 
-        /* 侧边栏 */
+        /* 侧边栏 - Tabler风格 */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             height: 100vh;
             width: var(--sidebar-width);
-            background: #2c2c54;
+            background: #1c2128;
             z-index: 1000;
             transition: all 0.3s ease;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 0 1px rgba(0,0,0,.07);
         }
 
         .sidebar-header {
             height: 64px;
-            background: #1e293b;
+            background: transparent;
             display: flex;
             align-items: center;
             padding: 0 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .sidebar-header h4 {
@@ -150,11 +151,11 @@
             border-left-color: #fff;
         }
 
-        /* 主内容区 */
+        /* 主内容区 - Tabler风格 */
         .main-content {
             margin-left: 200px;  /* 固定200px，匹配侧边栏宽度 */
             min-height: 100vh;
-            background: #f1f5f9;  /* 更柔和的灰蓝色背景 */
+            background: #f5f7fb;  /* Tabler风格的浅灰蓝背景 */
         }
 
         /* 内容容器 - 带padding */
@@ -173,11 +174,11 @@
             border-bottom: 1px solid #e9ecef;
         }
 
-        /* 卡片 */
+        /* 卡片 - Tabler简洁风格 */
         .card {
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             margin-bottom: var(--spacing-lg);
             transition: all 0.3s ease;
             background: #fff;
@@ -185,22 +186,23 @@
         }
 
         .card:hover {
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transform: translateY(-1px);
         }
 
         .card-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: #fff;
-            padding: var(--spacing-lg) var(--spacing-xl);
+            background: #fff;
+            color: #374151;
+            padding: 16px 20px;
             border: none;
+            border-bottom: 1px solid #e5e7eb;
             font-weight: 600;
-            font-size: var(--font-base);
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            font-size: 15px;
+            border-radius: 8px 8px 0 0;
         }
 
         .card-body {
-            padding: var(--spacing-xl);
+            padding: 20px;
         }
 
         /* 表格优化 */
@@ -336,47 +338,51 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: var(--primary);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             color: #fff;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            background: var(--primary-dark);
+            transform: none;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            background: var(--success);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             color: #fff;
         }
 
         .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            background: #047857;
+            transform: none;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            background: var(--danger);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             color: #fff;
         }
 
         .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+            background: #b91c1c;
+            transform: none;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .btn-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            background: var(--info);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             color: #fff;
         }
 
         .btn-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            background: #0369a1;
+            transform: none;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .btn-outline-secondary {
