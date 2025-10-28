@@ -102,12 +102,36 @@
                                 <span class="text-sm font-bold text-gray-900 dark:text-white">{{ step[1] }}</span>
                             </div>
                             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                                <div class="bg-{{ step[2] }}-500 h-3 rounded-full transition-all duration-500" 
-                                     style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% if step[2] == 'blue' %}
+                                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% elif step[2] == 'green' %}
+                                    <div class="bg-green-500 h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% elif step[2] == 'yellow' %}
+                                    <div class="bg-yellow-500 h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% elif step[2] == 'pink' %}
+                                    <div class="bg-pink-500 h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% else %}
+                                    <div class="bg-gray-500 h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                                {% endif %}
                             </div>
                             {% if not loop.last %}
                                 <div class="flex justify-center my-2">
-                                    <i class="fas fa-arrow-down text-{{ step[2] }}-500"></i>
+                                    {% if step[2] == 'blue' %}
+                                        <i class="fas fa-arrow-down text-blue-500"></i>
+                                    {% elif step[2] == 'green' %}
+                                        <i class="fas fa-arrow-down text-green-500"></i>
+                                    {% elif step[2] == 'yellow' %}
+                                        <i class="fas fa-arrow-down text-yellow-500"></i>
+                                    {% elif step[2] == 'pink' %}
+                                        <i class="fas fa-arrow-down text-pink-500"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-gray-500"></i>
+                                    {% endif %}
                                 </div>
                             {% endif %}
                         </div>
