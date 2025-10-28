@@ -139,12 +139,6 @@
                         >
                             <i class="fas fa-save mr-2"></i> 保存修改
                         </button>
-                        <button 
-                            onclick="sendMessage()"
-                            class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                        >
-                            <i class="fas fa-paper-plane mr-2"></i> 发送消息
-                        </button>
                     </div>
                 </div>
             </div>
@@ -157,9 +151,9 @@
                     <i class="fas fa-comments mr-2"></i> 对话历史
                 </h3>
             </div>
-            <div class="p-6 max-h-[600px] overflow-y-auto">
+            <div class="p-6 max-h-[600px] overflow-y-auto" id="historyScroll">
                 {% if user_data.get('history') %}
-                    <div class="space-y-4">
+                    <div class="space-y-4" id="historyContainer">
                         {% for msg in user_data.history %}
                         <div class="flex items-start gap-3 {% if msg.role == 'user' %}flex-row-reverse{% endif %}">
                             <div class="flex-shrink-0">
@@ -185,7 +179,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="text-center py-12">
+                    <div class="text-center py-12" id="historyEmpty">
                         <i class="fas fa-comment-slash text-4xl text-gray-300 dark:text-gray-600 mb-3"></i>
                         <p class="text-gray-500 dark:text-gray-400">暂无对话历史</p>
                     </div>
@@ -259,15 +253,13 @@ function sendQuickMessage() {
 }
 
 function addMessageToHistory(role, content) {
-    const historyContainer = document.querySelector('.space-y-4, .text-center');
-    const isHistoryEmpty = historyContainer.classList.contains('text-center');
-    
-    if (isHistoryEmpty) {
-        // 如果有空的占位符，替换它
-        historyContainer.outerHTML = '<div class="space-y-4" id="historyContainer"></div>';
+    // 如果原来是空列表，替换为空容器
+    const emptyEl = document.getElementById('historyEmpty');
+    if (emptyEl) {
+        emptyEl.outerHTML = '<div class="space-y-4" id="historyContainer"></div>';
     }
-    
-    const container = document.getElementById('historyContainer') || historyContainer;
+
+    const container = document.getElementById('historyContainer');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'flex items-start gap-3';
     messageDiv.innerHTML = `
@@ -284,9 +276,12 @@ function addMessageToHistory(role, content) {
         </div>
     `;
     container.appendChild(messageDiv);
-    
+
     // 滚动到最新消息
-    historyContainer.scrollTop = historyContainer.scrollHeight;
+    const scrollBox = document.getElementById('historyScroll');
+    if (scrollBox) {
+        scrollBox.scrollTop = scrollBox.scrollHeight;
+    }
 }
 
 function showSuccessMessage(text) {
@@ -311,41 +306,7 @@ function showSuccessMessage(text) {
     }, 2500);
 }
 
-function sendMessage() {
-    const message = prompt('输入要发送给用户的消息:');
-    if (message && message.trim()) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/push';
-        
-        const targetType = document.createElement('input');
-        targetType.type = 'hidden';
-        targetType.name = 'target_type';
-        targetType.value = 'selected';
-        form.appendChild(targetType);
-        
-        const targetUsers = document.createElement('input');
-        targetUsers.type = 'hidden';
-        targetUsers.name = 'target_users';
-        targetUsers.value = '{{ user_id }}';
-        form.appendChild(targetUsers);
-        
-        const msgInput = document.createElement('input');
-        msgInput.type = 'hidden';
-        msgInput.name = 'message';
-        msgInput.value = message;
-        form.appendChild(msgInput);
-        
-        const pushType = document.createElement('input');
-        pushType.type = 'hidden';
-        pushType.name = 'push_type';
-        pushType.value = 'text';
-        form.appendChild(pushType);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
+// 已移除顶部 prompt 发送逻辑，统一使用底部输入框
 
 function saveUser() {
     const note = document.getElementById('noteInput').value;
