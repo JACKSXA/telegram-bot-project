@@ -10,6 +10,26 @@
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">欢迎来到 Bot 管理后台</p>
     </div>
 
+    <!-- System Status -->
+    <div class="mb-6 rounded-[10px] bg-white px-6 py-4 shadow-md dark:bg-gray-800">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div id="botStatus" class="h-3 w-3 rounded-full bg-gray-400 animate-pulse"></div>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Bot状态</span>
+                    <span id="botStatusText" class="text-sm text-gray-500 dark:text-gray-400">检测中...</span>
+                </div>
+                <div class="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <span id="systemStats">加载中...</span>
+                </div>
+            </div>
+            <button onclick="refreshSystemStatus()" class="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                <i class="fas fa-sync-alt mr-1"></i> 刷新
+            </button>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <!-- Total Users -->
@@ -130,4 +150,44 @@
         </div>
     </div>
 </div>
+
+<script>
+// Bot心跳监控
+function refreshSystemStatus() {
+    const botStatus = document.getElementById('botStatus');
+    const botStatusText = document.getElementById('botStatusText');
+    const systemStats = document.getElementById('systemStats');
+    
+    // 检测Bot健康状态
+    fetch('/api/system-stats')
+        .then(r => r.json())
+        .then(data => {
+            if (data.bot_online) {
+                botStatus.className = 'h-3 w-3 rounded-full bg-green-500';
+                botStatusText.textContent = '在线';
+            } else {
+                botStatus.className = 'h-3 w-3 rounded-full bg-red-500 animate-pulse';
+                botStatusText.textContent = '离线';
+            }
+            
+            // 显示系统统计
+            if (data.db_connected) {
+                systemStats.textContent = `数据库: 正常 | 用户: ${data.total_users} | 对话: ${data.total_conversations}`;
+            } else {
+                systemStats.textContent = '数据库: 连接失败';
+            }
+        })
+        .catch(e => {
+            botStatus.className = 'h-3 w-3 rounded-full bg-red-500 animate-pulse';
+            botStatusText.textContent = '检测失败';
+            systemStats.textContent = '无法获取系统状态';
+        });
+}
+
+// 页面加载时刷新状态
+refreshSystemStatus();
+
+// 每30秒自动刷新
+setInterval(refreshSystemStatus, 30000);
+</script>
 {% endblock %}
