@@ -1,0 +1,211 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}消息推送 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            <i class="fas fa-bullhorn mr-2"></i> 消息推送
+        </h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">向用户发送消息通知</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <!-- Main Form -->
+        <div class="lg:col-span-2">
+            <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+                <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-paper-plane mr-2"></i> 推送设置
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <form method="POST" id="pushForm">
+                        <!-- Target Users -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-users mr-2"></i>目标用户
+                            </label>
+                            <select 
+                                name="target_type" 
+                                id="target_type" 
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                onchange="updateTargetInfo()"
+                            >
+                                <option value="all">全部用户 ({{ stats.all }})</option>
+                                <option value="waiting">等待客服的用户 ({{ stats.waiting }})</option>
+                                <option value="bound">已绑定的用户 ({{ stats.bound }})</option>
+                                <option value="selected">精确推送（指定用户ID）</option>
+                            </select>
+                        </div>
+                        
+                        <!-- User IDs Input -->
+                        <div class="mb-6" id="userSelect" style="display:none;">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-id-card mr-2"></i>指定用户ID
+                            </label>
+                            <input 
+                                type="text" 
+                                name="target_users" 
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                placeholder="例如: 7897880011, 123456789"
+                            >
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">多个用户ID用逗号分隔</p>
+                        </div>
+                        
+                        <!-- Message Content -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-edit mr-2"></i> 消息内容
+                            </label>
+                            <textarea 
+                                name="message" 
+                                rows="10" 
+                                id="messageContent" 
+                                required 
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                                placeholder="输入要推送的消息内容...
+
+支持变量：
+{username} - 用户名
+{wallet} - 钱包地址
+{user_id} - 用户ID
+
+支持格式：
+<b>粗体</b>
+<i>斜体</i>
+<code>代码</code>"
+                            ></textarea>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">支持HTML格式和Markdown格式</p>
+                        </div>
+
+                        <!-- Push Type -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                推送类型
+                            </label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <input type="radio" name="push_type" id="typeText" value="text" checked class="hidden">
+                                <label for="typeText" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500">
+                                    <i class="fas fa-file-alt mr-2"></i> 纯文本
+                                </label>
+                                
+                                <input type="radio" name="push_type" id="typeHTML" value="html" class="hidden">
+                                <label for="typeHTML" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500">
+                                    <i class="fas fa-code mr-2"></i> HTML
+                                </label>
+                                
+                                <input type="radio" name="push_type" id="typeMarkdown" value="markdown" class="hidden">
+                                <label for="typeMarkdown" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500">
+                                    <i class="fab fa-markdown mr-2"></i> Markdown
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-3">
+                            <button 
+                                type="button" 
+                                onclick="previewMessage()"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                <i class="fas fa-eye mr-2"></i> 预览消息
+                            </button>
+                            <button 
+                                type="submit" 
+                                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <i class="fas fa-paper-plane mr-2"></i> 立即推送
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Stats -->
+            <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+                <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-chart-bar mr-2"></i> 用户统计
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">总用户数</span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">{{ stats.all }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">等待客服</span>
+                        <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">{{ stats.waiting }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">已绑定</span>
+                        <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ stats.bound }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">已完成充值</span>
+                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ stats.transfer_completed }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+                <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-lightbulb mr-2"></i> 使用提示
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4 text-sm">
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white mb-2">变量替换：</p>
+                        <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>• {username} - 用户名</li>
+                            <li>• {wallet} - 钱包地址</li>
+                            <li>• {user_id} - 用户ID</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white mb-2">推送对象：</p>
+                        <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>• 全部用户 - 所有人</li>
+                            <li>• 等待客服 - 刚收到$100的用户</li>
+                            <li>• 已绑定 - 已完成绑定</li>
+                            <li>• 精确推送 - 指定ID</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateTargetInfo() {
+    const targetType = document.getElementById('target_type').value;
+    const userSelect = document.getElementById('userSelect');
+    
+    if (targetType === 'selected') {
+        userSelect.style.display = 'block';
+    } else {
+        userSelect.style.display = 'none';
+    }
+}
+
+function previewMessage() {
+    const message = document.getElementById('messageContent').value;
+    const content = message
+        .replace(/{username}/g, '示例用户')
+        .replace(/{wallet}/g, '0x1234...5678')
+        .replace(/{user_id}/g, '123456789');
+    
+    alert('消息预览：\n\n' + content);
+}
+</script>
+{% endblock %}
+

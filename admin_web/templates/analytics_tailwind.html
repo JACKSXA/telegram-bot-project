@@ -1,0 +1,187 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}数据分析 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">数据分析</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">用户转化漏斗和详细统计</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <!-- Total Users -->
+        <div class="stat-card rounded-[10px] bg-white px-6 py-5 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">总用户数</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ data.total_users }}</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-users text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Conversion -->
+        <div class="stat-card rounded-[10px] bg-white px-6 py-5 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">钱包转化率</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ "%.1f"|format(data.conversion_rates.to_wallet) }}%</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/30">
+                    <i class="fas fa-wallet text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Conversion -->
+        <div class="stat-card rounded-[10px] bg-white px-6 py-5 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">服务转化率</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ "%.1f"|format(data.conversion_rates.to_service) }}%</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/30">
+                    <i class="fas fa-headset text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfer Conversion -->
+        <div class="stat-card rounded-[10px] bg-white px-6 py-5 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">转账转化率</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ "%.1f"|format(data.conversion_rates.to_transfer) }}%</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30">
+                    <i class="fas fa-exchange-alt text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+        <!-- Funnel Chart -->
+        <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+            <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-funnel-dollar mr-2"></i> 转化漏斗
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% set steps = [
+                        ('注册用户', data.total_users, 'blue'),
+                        ('创建钱包', data.state_distribution.get('wallet_verified', 0), 'green'),
+                        ('等待服务', data.state_distribution.get('waiting_customer_service', 0), 'yellow'),
+                        ('已绑定', data.state_distribution.get('bound_and_ready', 0), 'purple'),
+                        ('转账完成', data.state_distribution.get('transfer_completed', 0), 'pink')
+                    ] %}
+                    
+                    {% for step in steps %}
+                        <div class="relative">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ step[0] }}</span>
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">{{ step[1] }}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div class="bg-{{ step[2] }}-500 h-3 rounded-full transition-all duration-500" 
+                                     style="width: {{ (step[1] / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                            </div>
+                            {% if not loop.last %}
+                                <div class="flex justify-center my-2">
+                                    <i class="fas fa-arrow-down text-{{ step[2] }}-500"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- State Distribution -->
+        <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+            <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-chart-pie mr-2"></i> 用户状态分布
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    {% for state, count in data.state_distribution.items() %}
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <div class="flex items-center gap-3">
+                            {% if state == 'waiting_customer_service' %}
+                                <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">等待客服</span>
+                            {% elif state == 'bound_and_ready' %}
+                                <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">已绑定</span>
+                            {% elif state == 'wallet_verified' %}
+                                <i class="fas fa-wallet text-blue-600 dark:text-blue-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">已验证</span>
+                            {% elif state == 'waiting_transfer' %}
+                                <i class="fas fa-clock text-orange-600 dark:text-orange-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">等待转账</span>
+                            {% elif state == 'transfer_completed' %}
+                                <i class="fas fa-check-double text-green-600 dark:text-green-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">转账完成</span>
+                            {% else %}
+                                <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ state }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {{ count }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Distribution -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-globe mr-2"></i> 语言分布
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for lang, count in data.language_distribution.items() %}
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div class="flex items-center gap-3">
+                        {% if lang == 'zh' %}
+                            <i class="fas fa-flag text-blue-600 dark:text-blue-400"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">中文</span>
+                        {% elif lang == 'en' %}
+                            <i class="fas fa-flag text-green-600 dark:text-green-400"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">English</span>
+                        {% else %}
+                            <i class="fas fa-language text-gray-600 dark:text-gray-400"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ lang }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-{{ 'blue' if lang == 'zh' else 'green' }}-500 h-2 rounded-full" 
+                                 style="width: {{ (count / data.total_users * 100) if data.total_users > 0 else 0 }}%"></div>
+                        </div>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white w-12 text-right">{{ count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

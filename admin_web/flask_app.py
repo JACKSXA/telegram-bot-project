@@ -276,7 +276,7 @@ def analytics():
         'total_users': total
     }
     
-    return render_template('analytics.html', data=analytics_data)
+    return render_template('analytics_tailwind.html', data=analytics_data)
 
 @app.route('/users')
 def users():
@@ -489,7 +489,7 @@ def push():
         'transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False))
     }
     
-    return render_template('push.html', stats=stats, users=sessions)
+    return render_template('push_tailwind.html', stats=stats, users=sessions)
 
 @app.route('/ad', methods=['GET', 'POST'])
 def ad():
