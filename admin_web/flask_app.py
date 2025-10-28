@@ -716,6 +716,14 @@ def ab_test():
     
     return render_template('ab_test_tailwind.html')
 
+@app.route('/journey')
+def journey():
+    """营销旅程管理"""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template('journey_tailwind.html')
+
 @app.route('/ad', methods=['GET', 'POST'])
 def ad():
     """广告管理"""

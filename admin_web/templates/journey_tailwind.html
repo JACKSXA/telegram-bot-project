@@ -1,0 +1,133 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}营销旅程 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            <i class="fas fa-route mr-2"></i> 营销旅程管理
+        </h1>
+        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">配置自动化营销旅程和触发器</p>
+    </div>
+
+    <!-- Create Journey Form -->
+    <div class="mb-8 rounded-[10px] bg-white shadow-md dark:bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-plus-circle mr-2"></i> 创建新旅程
+        </h3>
+        <form id="createJourneyForm" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">旅程键</label>
+                <input type="text" id="journeyKey" required placeholder="如: state_wallet_verified"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">节点</label>
+                <input type="text" id="node" required placeholder="如: welcome_message"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">配置JSON</label>
+                <input type="text" id="config" required placeholder='{"action":"send_message"}'
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" 
+                    class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i> 创建
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Journeys List -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-list mr-2"></i> 旅程列表
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="journeysContainer">
+                <div class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-3"></i>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+// Toast通知
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `${isError ? 'bg-red-500' : 'bg-green-500'} text-white px-6 py-4 rounded-lg shadow-xl mb-4`;
+    toast.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// 创建旅程
+document.getElementById('createJourneyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const journeyKey = document.getElementById('journeyKey').value;
+    const node = document.getElementById('node').value;
+    let config;
+    
+    try {
+        config = JSON.parse(document.getElementById('config').value);
+    } catch (error) {
+        showToast('配置JSON格式错误', true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/journeys/${journeyKey}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({node, config})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('旅程创建成功！', false);
+            document.getElementById('createJourneyForm').reset();
+            loadJourneys();
+        } else {
+            showToast('创建失败：' + (data.error || '未知错误'), true);
+        }
+    } catch (error) {
+        showToast('创建失败：' + error, true);
+    }
+});
+
+// 加载旅程列表
+async function loadJourneys() {
+    // 展示提示
+    document.getElementById('journeysContainer').innerHTML = `
+        <div class="text-center py-12">
+            <i class="fas fa-route text-6xl text-gray-300 mb-4"></i>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">暂无旅程配置</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500">创建旅程后将在这里显示</p>
+        </div>
+    `;
+}
+
+// 页面加载时加载数据
+loadJourneys();
+</script>
+{% endblock %}
+
