@@ -406,6 +406,24 @@ def update_user(user_id):
     
     return jsonify({'success': True})
 
+@app.route('/user/<int:user_id>/send-message', methods=['POST'])
+def send_user_message(user_id):
+    """发送消息给指定用户"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    data = request.json
+    message = data.get('message', '')
+    
+    if not message:
+        return jsonify({'success': False, 'error': 'Message is empty'})
+    
+    # 发送消息
+    if send_telegram_message(user_id, message):
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to send message'})
+
 @app.route('/push', methods=['GET', 'POST'])
 def push():
     """消息推送"""
