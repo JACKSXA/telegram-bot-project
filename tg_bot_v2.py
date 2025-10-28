@@ -1003,7 +1003,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 如果是群组回复的消息（客服确认）
         if chat_type in ['group', 'supergroup'] and chat_id == int(ADMIN_GROUP_ID or 0):
             # 检查是否是客服确认消息（格式：确认 [用户ID]）
-            import re
             match = re.search(r'确认\s*(\d+)', user_message)
             if match:
                 target_user_id = int(match.group(1))  # 提取用户ID
