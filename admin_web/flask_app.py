@@ -670,6 +670,80 @@ def system_stats():
     
     return jsonify(stats)
 
+@app.route('/api/batch-update-state', methods=['POST'])
+def batch_update_state():
+    """批量更新用户状态"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    user_ids = data.get('user_ids', [])
+    new_state = data.get('state', '')
+    
+    if not user_ids or not new_state:
+        return jsonify({'success': False, 'error': 'Invalid params'})
+    
+    updated = 0
+    for user_id in user_ids:
+        try:
+            db._execute("UPDATE users SET state = ? WHERE user_id = ?", (new_state, user_id))
+            updated += 1
+        except:
+            pass
+    
+    logger.info(f"批量更新状态: {updated}/{len(user_ids)}个用户 -> {new_state}")
+    return jsonify({'success': True, 'updated': updated})
+
+@app.route('/api/batch-send-message', methods=['POST'])
+def batch_send_message():
+    """批量发送消息"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    user_ids = data.get('user_ids', [])
+    message = data.get('message', '')
+    
+    if not user_ids or not message:
+        return jsonify({'success': False, 'error': 'Invalid params'})
+    
+    sent = 0
+    for user_id in user_ids:
+        if send_telegram_message(user_id, message):
+            try:
+                db.save_conversation(user_id, 'assistant', message)
+            except:
+                pass
+            sent += 1
+    
+    logger.info(f"批量发送消息: {sent}/{len(user_ids)}个用户")
+    return jsonify({'success': True, 'sent': sent})
+
+@app.route('/api/batch-delete', methods=['POST'])
+def batch_delete():
+    """批量删除用户"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    user_ids = data.get('user_ids', [])
+    
+    if not user_ids:
+        return jsonify({'success': False, 'error': 'Invalid params'})
+    
+    deleted = 0
+    for user_id in user_ids:
+        try:
+            db._execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+            db._execute("DELETE FROM conversations WHERE user_id = ?", (user_id,))
+            db._execute("DELETE FROM wallet_info WHERE user_id = ?", (user_id,))
+            deleted += 1
+        except:
+            pass
+    
+    logger.info(f"批量删除: {deleted}/{len(user_ids)}个用户")
+    return jsonify({'success': True, 'deleted': deleted})
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))

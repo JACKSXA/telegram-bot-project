@@ -82,15 +82,24 @@
 
     <!-- Users List -->
     <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 overflow-hidden">
-        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 <i class="fas fa-list mr-2"></i> 用户列表
             </h3>
+            <div class="flex items-center gap-3" id="batchActions" style="display: none;">
+                <span id="selectedCount" class="text-sm text-gray-600 dark:text-gray-400">已选择 <strong>0</strong> 个用户</span>
+                <button onclick="batchUpdateStatus()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">批量标记状态</button>
+                <button onclick="batchSendMessage()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">批量发送消息</button>
+                <button onclick="batchDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">批量删除</button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 w-12">
+                            <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                        </th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">用户</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">地区</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">语言</th>
@@ -106,6 +115,9 @@
                         data-userid="{{ user.user_id }}"
                         data-wallet="{{ user.wallet or '' }}"
                     >
+                        <td class="px-6 py-4 whitespace-nowrap w-12">
+                            <input type="checkbox" class="user-checkbox" value="{{ user.user_id }}" onchange="updateBatchActions()">
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if user.avatar_url %}
@@ -284,6 +296,109 @@ function showToast(text, isError = false) {
         toast.style.transition = 'opacity .3s';
         setTimeout(() => toast.remove(), 300);
     }, 2000);
+}
+
+// 批量操作功能
+function updateBatchActions() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const count = checkboxes.length;
+    const batchActions = document.getElementById('batchActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (count > 0) {
+        batchActions.style.display = 'flex';
+        selectedCount.innerHTML = `已选择 <strong>${count}</strong> 个用户`;
+    } else {
+        batchActions.style.display = 'none';
+    }
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateBatchActions();
+}
+
+function getSelectedUserIds() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    return Array.from(checkboxes).map(cb => parseInt(cb.value));
+}
+
+function batchUpdateStatus() {
+    const userIds = getSelectedUserIds();
+    if (userIds.length === 0) {
+        alert('请先选择要操作的用户');
+        return;
+    }
+    
+    const state = prompt(`为 ${userIds.length} 个用户设置新状态：\n\n可选：idle / waiting_wallet / wallet_verified / waiting_transfer / completed`);
+    if (!state || !state.trim()) return;
+    
+    fetch('/api/batch-update-state', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_ids: userIds, state: state.trim()})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`已批量更新 ${data.updated || userIds.length} 个用户状态`);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('批量更新失败：' + (data.error || '未知错误'), true);
+        }
+    });
+}
+
+function batchSendMessage() {
+    const userIds = getSelectedUserIds();
+    if (userIds.length === 0) {
+        alert('请先选择要操作的用户');
+        return;
+    }
+    
+    const message = prompt(`向 ${userIds.length} 个用户发送消息：`);
+    if (!message || !message.trim()) return;
+    
+    fetch('/api/batch-send-message', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_ids: userIds, message: message.trim()})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`已向 ${data.sent || 0} 个用户发送消息`);
+        } else {
+            showToast('批量发送失败：' + (data.error || '未知错误'), true);
+        }
+    });
+}
+
+function batchDelete() {
+    const userIds = getSelectedUserIds();
+    if (userIds.length === 0) {
+        alert('请先选择要操作的用户');
+        return;
+    }
+    
+    if (!confirm(`确定要删除 ${userIds.length} 个用户吗？此操作不可恢复！`)) return;
+    
+    fetch('/api/batch-delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_ids: userIds})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`已删除 ${data.deleted || userIds.length} 个用户`);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('批量删除失败：' + (data.error || '未知错误'), true);
+        }
+    });
 }
 </script>
     
