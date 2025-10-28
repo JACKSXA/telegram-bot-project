@@ -14,7 +14,7 @@ import sys
 import json
 import logging
 from logging.handlers import RotatingFileHandler
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_session import Session
 import requests
@@ -306,6 +306,26 @@ def users():
     
     # 获取筛选条件
     filter_state = request.args.get('state', '')
+    filter_date = request.args.get('date', '')  # all/today/week/month
+    filter_activity = request.args.get('activity', '')  # active3d/active7d/active30d
+    
+    # 计算时间范围
+    now = datetime.now()
+    date_filter = None
+    if filter_date == 'today':
+        date_filter = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif filter_date == 'week':
+        date_filter = now - timedelta(days=7)
+    elif filter_date == 'month':
+        date_filter = now - timedelta(days=30)
+    
+    activity_filter = None
+    if filter_activity == 'active3d':
+        activity_filter = now - timedelta(days=3)
+    elif filter_activity == 'active7d':
+        activity_filter = now - timedelta(days=7)
+    elif filter_activity == 'active30d':
+        activity_filter = now - timedelta(days=30)
     
     for user_id, data in sessions.items():
         user_state = data.get('state', 'unknown')
@@ -313,6 +333,38 @@ def users():
         # 如果指定了状态筛选，只显示匹配的用户
         if filter_state and user_state != filter_state:
             continue
+        
+        # 日期筛选（基于created_at）
+        if date_filter:
+            created_at = data.get('created_at')
+            if created_at:
+                try:
+                    from datetime import datetime
+                    # 如果created_at是字符串，需要解析
+                    if isinstance(created_at, str):
+                        created_at = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                    if created_at < date_filter:
+                        continue
+                except:
+                    pass
+        
+        # 活动时间筛选（基于conversations表中的最新对话）
+        if activity_filter:
+            try:
+                # 从数据库获取该用户最新对话时间
+                conversations = db.get_conversations(user_id, limit=1)
+                if conversations and len(conversations) > 0:
+                    last_time = conversations[-1].get('timestamp')
+                    if isinstance(last_time, str):
+                        from datetime import datetime
+                        last_time = datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
+                    if last_time < activity_filter:
+                        continue
+                else:
+                    # 没有对话记录，跳过
+                    continue
+            except:
+                pass
             
         users_list.append({
             'user_id': user_id,
@@ -323,7 +375,8 @@ def users():
             'language': data.get('language', 'zh'),
             'transfer_completed': data.get('transfer_completed', False),
             'avatar_url': data.get('avatar_url'),
-            'ip_info': data.get('ip_info')
+            'ip_info': data.get('ip_info'),
+            'created_at': data.get('created_at')
         })
     
     # 服务端分页

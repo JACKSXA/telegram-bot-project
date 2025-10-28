@@ -78,6 +78,29 @@
                 </select>
             </div>
         </div>
+        <!-- 高级筛选：日期和活动时间 -->
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
+            <select 
+                id="filterDate" 
+                onchange="applyFilters()"
+                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+            >
+                <option value="">所有注册日期</option>
+                <option value="today" class="text-gray-900">今日</option>
+                <option value="week" class="text-gray-900">最近7天</option>
+                <option value="month" class="text-gray-900">最近30天</option>
+            </select>
+            <select 
+                id="filterActivity" 
+                onchange="applyFilters()"
+                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+            >
+                <option value="">所有活动时间</option>
+                <option value="active3d" class="text-gray-900">最近3天有对话</option>
+                <option value="active7d" class="text-gray-900">最近7天有对话</option>
+                <option value="active30d" class="text-gray-900">最近30天有对话</option>
+            </select>
+        </div>
     </div>
 
     <!-- Users List -->
@@ -399,6 +422,20 @@ function batchDelete() {
             showToast('批量删除失败：' + (data.error || '未知错误'), true);
         }
     });
+}
+
+// 高级筛选应用
+function applyFilters() {
+    const state = document.getElementById('filterState')?.value || '';
+    const date = document.getElementById('filterDate')?.value || '';
+    const activity = document.getElementById('filterActivity')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (state) params.append('state', state);
+    if (date) params.append('date', date);
+    if (activity) params.append('activity', activity);
+    
+    window.location.href = '/users?' + params.toString();
 }
 </script>
     
