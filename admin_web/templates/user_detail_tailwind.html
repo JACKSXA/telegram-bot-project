@@ -207,21 +207,63 @@
     </div>
 </div>
 
+<!-- 确认保存对话框 -->
 <div id="confirmSaveModal" class="hidden fixed inset-0 z-50">
-  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeConfirmSave()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4">
-    <div class="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 shadow-2xl">
-      <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          <i class="fas fa-question-circle text-blue-500 mr-2"></i> 确认保存修改？
-        </h3>
+    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-800 shadow-2xl">
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <i class="fas fa-save text-white text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">确认保存修改</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">请确认以下更改</p>
+          </div>
+        </div>
+        <button onclick="closeConfirmSave()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div class="px-5 py-4 text-gray-700 dark:text-gray-300">
-        将更新该用户的备注与钱包地址。
+      
+      <!-- Content -->
+      <div class="px-6 py-6">
+        <div class="space-y-4">
+          <!-- 备注 -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fas fa-sticky-note text-blue-600 dark:text-blue-400"></i>
+              <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">备注</span>
+            </div>
+            <p id="confirmNote" class="text-base text-gray-900 dark:text-white"></p>
+          </div>
+          
+          <!-- 钱包地址 -->
+          <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fas fa-wallet text-green-600 dark:text-green-400"></i>
+              <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">钱包地址</span>
+            </div>
+            <p id="confirmWallet" class="text-base font-mono text-gray-900 dark:text-white break-all"></p>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex items-center gap-2 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+          <i class="fas fa-exclamation-circle text-yellow-600 dark:text-yellow-400"></i>
+          <span class="text-sm text-yellow-700 dark:text-yellow-300">修改将立即生效，无法撤销</span>
+        </div>
       </div>
-      <div class="px-5 py-4 flex gap-3 justify-end border-t border-gray-200 dark:border-gray-700">
-        <button onclick="closeConfirmSave()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">取消</button>
-        <button onclick="saveUser()" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">确认保存</button>
+      
+      <!-- Actions -->
+      <div class="px-6 py-4 flex gap-3 justify-end border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <button onclick="closeConfirmSave()" class="px-6 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors">
+          <i class="fas fa-times mr-2"></i> 取消
+        </button>
+        <button onclick="saveUser()" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg shadow-blue-500/30 transition-all">
+          <i class="fas fa-save mr-2"></i> 确认保存
+        </button>
       </div>
     </div>
   </div>
@@ -326,7 +368,16 @@ function showSuccessMessage(text) {
 // 已移除顶部 prompt 发送逻辑，统一使用底部输入框
 
 function openConfirmSave(){
-  const modal=document.getElementById('confirmSaveModal');
+  // 获取要保存的值
+  const note = document.getElementById('noteInput').value;
+  const wallet = document.getElementById('walletInput').value;
+  
+  // 填充确认对话框
+  document.getElementById('confirmNote').textContent = note || '（无备注）';
+  document.getElementById('confirmWallet').textContent = wallet || '（未设置）';
+  
+  // 显示对话框
+  const modal = document.getElementById('confirmSaveModal');
   modal.classList.remove('hidden');
 }
 function closeConfirmSave(){
