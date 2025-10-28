@@ -730,7 +730,7 @@ def ad():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
-    return render_template('ad.html')
+    return render_template('ad_tailwind.html')
 
 @app.route('/stats')
 def stats():

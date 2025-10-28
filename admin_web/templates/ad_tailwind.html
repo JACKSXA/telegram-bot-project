@@ -1,0 +1,203 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}广告管理 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            <i class="fas fa-megaphone mr-2"></i> 广告管理
+        </h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">管理广告位和统计数据</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
+        <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 px-6 py-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">总展示次数</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">9,257</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-eye text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 px-6 py-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">总点击次数</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">1,913</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/30">
+                    <i class="fas fa-mouse-pointer text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 px-6 py-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">点击率</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">20.7%</h3>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/30">
+                    <i class="fas fa-percent text-2xl text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ad List -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800 mb-6">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-list-ul mr-2"></i> 广告位列表
+                </h3>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                    <i class="fas fa-plus-circle mr-2"></i> 创建新广告位
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">广告位ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">类型</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">状态</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">展示次数</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">点击次数</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">操作</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="text-sm font-mono text-blue-600 dark:text-blue-400">ad_welcome_001</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <i class="fas fa-hand-paper mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-900 dark:text-white">欢迎消息</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                <i class="fas fa-check-circle mr-1"></i> 启用
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">1,234</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">456</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                <i class="fas fa-chart-bar"></i> 统计
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="text-sm font-mono text-blue-600 dark:text-blue-400">ad_banner_001</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <i class="fas fa-image mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-900 dark:text-white">横幅广告</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                <i class="fas fa-check-circle mr-1"></i> 启用
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">5,678</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">890</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                <i class="fas fa-chart-bar"></i> 统计
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="text-sm font-mono text-blue-600 dark:text-blue-400">ad_popup_001</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <i class="fas fa-window-restore mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-900 dark:text-white">弹窗广告</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                <i class="fas fa-pause-circle mr-1"></i> 停用
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">2,345</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">567</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                <i class="fas fa-chart-bar"></i> 统计
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-lightbulb mr-2"></i> 使用说明
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                            <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">广告位用途</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">广告位用于在不同时机展示广告内容</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                            <i class="fas fa-info-circle text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">状态管理</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">可设置启用/停用状态，灵活控制广告展示</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                            <i class="fas fa-chart-line text-purple-600 dark:text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">数据统计</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">支持查看详细统计数据，实时监控广告效果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
