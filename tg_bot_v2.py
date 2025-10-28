@@ -633,37 +633,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_title = getattr(update.message.chat, 'title', 'N/A')
     logger.info(f"用户 {user_id} ({lang}) [聊天类型:{chat_type}, 聊天ID:{chat_id}, 标题:{chat_title}]: {user_message}")
     
-    # 严格校验：仅允许Solana地址。若识别为其他链格式，立即提示并返回
-    try:
-        txt = (user_message or '').strip()
-        is_eth = bool(re.match(r'^0x[0-9a-fA-F]{40}$', txt))
-        is_trx = bool(re.match(r'^[T][A-Za-z0-9]{33}$', txt))
-        is_btc = bool(re.match(r'^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$', txt))
-        looks_like_wallet = bool(re.match(r'^[A-Za-z0-9]{25,64}$', txt)) or is_eth or is_trx or is_btc
-        if looks_like_wallet and not is_valid_solana_address(txt):
-            if lang == 'zh':
-                msg = (
-                    "❌ 无效的钱包地址\n\n"
-                    "仅支持 <b>Solana</b> 链地址。请发送正确的 SOL 地址。\n\n"
-                    "示例（Base58，长度32-44）：\n"
-                    "• 9xQeWvG816bUx9EP...\n"
-                    "• 4Nd1mQ6...（不以0x开头）\n\n"
-                    "⚠️ 以 <code>0x</code> 开头的是以太坊地址，<code>T...</code> 开头通常是TRON地址，均不支持。"
-                )
-            else:
-                msg = (
-                    "❌ Invalid wallet address\n\n"
-                    "We only accept <b>Solana</b> addresses. Please send a valid SOL address.\n\n"
-                    "Examples (Base58, length 32-44):\n"
-                    "• 9xQeWvG816bUx9EP...\n"
-                    "• 4Nd1mQ6... (does NOT start with 0x)\n\n"
-                    "⚠️ Addresses starting with <code>0x</code> (Ethereum) or <code>T...</code> (TRON) are not supported."
-                )
-            await update.message.reply_text(msg, parse_mode='HTML')
-            return
-    except Exception as e:
-        logger.warning(f"非Sol地址校验失败: {e}")
-    
     # 保存用户消息到数据库（如果不是群组消息）
     if chat_type == 'private':
         try:
@@ -770,6 +739,48 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 else:
                     await update.message.reply_text("❌ 未找到对应的用户，请检查钱包地址是否正确。")
         return  # 群组消息处理完毕，直接返回
+    
+    # ====== 严格校验：仅允许Solana地址（必须在检测之前执行）======
+    # 检查是否为其他链的地址
+    txt = user_message.strip()
+    is_eth = bool(re.match(r'^0x[0-9a-fA-F]{40}$', txt))
+    is_trx = bool(re.match(r'^[T][A-Za-z0-9]{33}$', txt))
+    is_btc = bool(re.match(r'^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$', txt))
+    looks_like_wallet = bool(re.match(r'^[A-Za-z0-9]{20,64}$', txt))
+    
+    # 如果是其他链地址，立即拦截
+    if looks_like_wallet and (is_eth or is_trx or is_btc):
+        if lang == 'zh':
+            msg = (
+                "❌ <b>不支持的钱包地址类型</b>\n\n"
+                "本项目仅支持 <b>Solana</b> (SOL) 链地址。\n\n"
+                "<b>❌ 不支持的地址类型：</b>\n"
+                "• 以 <code>0x</code> 开头：以太坊地址\n"
+                "• 以 <code>T</code> 开头：TRON地址\n"
+                "• 以 <code>bc1</code> 开头：Bitcoin地址\n\n"
+                "<b>✅ 正确的Solana地址格式：</b>\n"
+                "• 长度：32-44个字符\n"
+                "• 字符集：Base58编码（不包含0、O、I、l）\n"
+                "• 示例：<code>9xQeWvG816bUx9EPjYMYr6TdwGQpUHLzT8U4VFnVnJTqY</code>\n\n"
+                "请创建或提供 Solana (SOL) 钱包地址。"
+            )
+        else:
+            msg = (
+                "❌ <b>Unsupported Wallet Address Type</b>\n\n"
+                "This project only supports <b>Solana</b> (SOL) addresses.\n\n"
+                "<b>❌ Unsupported types:</b>\n"
+                "• Starting with <code>0x</code>: Ethereum address\n"
+                "• Starting with <code>T</code>: TRON address\n"
+                "• Starting with <code>bc1</code>: Bitcoin address\n\n"
+                "<b>✅ Correct Solana format:</b>\n"
+                "• Length: 32-44 characters\n"
+                "• Character set: Base58 (no 0, O, I, l)\n"
+                "• Example: <code>9xQeWvG816bUx9EPjYMYr6TdwGQpUHLzT8U4VFnVnJTqY</code>\n\n"
+                "Please create or provide a Solana (SOL) wallet address."
+            )
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logger.warning(f"❌ 用户 {user_id} 发送了其他链地址: {user_message[:20]}")
+        return
     
     # 检测是否为Solana地址（自动验证）
     if is_valid_solana_address(user_message):
