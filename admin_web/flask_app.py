@@ -372,7 +372,7 @@ def user_detail(user_id):
         'wallet_info': user_data.get('wallet_info', {})
     }
     
-    return render_template('user_detail.html', user_id=user_id, user_data=user_data_dict)
+    return render_template('user_detail_tailwind.html', user_id=user_id, user_data=user_data_dict)
 
 @app.route('/user/<int:user_id>/update', methods=['POST'])
 def update_user(user_id):
