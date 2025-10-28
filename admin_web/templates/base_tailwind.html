@@ -15,7 +15,24 @@
     <style>
         /* 自定义样式 */
         body {
-            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* 统一下拉框样式 */
+        select {
+            font-size: 15px !important;
+        }
+        
+        select option {
+            font-size: 15px !important;
+            padding: 8px 12px;
+        }
+        
+        /* 统一输入框样式 */
+        input, textarea {
+            font-size: 15px !important;
         }
         
         /* 滚动条样式 */
@@ -29,13 +46,13 @@
         
         /* 菜单激活状态 */
         .menu-active {
-            background-color: #f3f4f6;
-            color: #4f46e5;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: #ffffff !important;
             font-weight: 600;
         }
         .dark .menu-active {
-            background-color: #1f2937;
-            color: #818cf8;
+            background: linear-gradient(to right, #4f46e5, #4338ca);
+            color: #ffffff !important;
         }
         
         /* 表格圆角 */

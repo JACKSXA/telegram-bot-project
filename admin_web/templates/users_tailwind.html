@@ -23,7 +23,7 @@
                         id="searchInput" 
                         placeholder="搜索用户ID、用户名、钱包地址..." 
                         oninput="filterTable()"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        class="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 rounded-lg leading-6 bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     >
                 </div>
             </div>
@@ -31,23 +31,23 @@
                 <select 
                     id="filterLanguage" 
                     onchange="filterTable()"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="block w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
                 >
                     <option value="">所有语言</option>
-                    <option value="zh">中文</option>
-                    <option value="en">English</option>
+                    <option value="zh" class="text-gray-900">中文</option>
+                    <option value="en" class="text-gray-900">English</option>
                 </select>
                 <select 
                     id="filterState" 
                     onchange="filterTable()"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="block w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
                 >
                     <option value="">所有状态</option>
-                    <option value="idle">空闲</option>
-                    <option value="waiting_wallet">等待钱包</option>
-                    <option value="wallet_verified">已验证</option>
-                    <option value="waiting_transfer">等待转账</option>
-                    <option value="completed">已完成</option>
+                    <option value="idle" class="text-gray-900">空闲</option>
+                    <option value="waiting_wallet" class="text-gray-900">等待钱包</option>
+                    <option value="wallet_verified" class="text-gray-900">已验证</option>
+                    <option value="waiting_transfer" class="text-gray-900">等待转账</option>
+                    <option value="completed" class="text-gray-900">已完成</option>
                 </select>
             </div>
         </div>
@@ -64,12 +64,12 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">用户</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">地区</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">语言</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">钱包</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">状态</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">操作</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">用户</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">地区</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">语言</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">钱包</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">状态</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">操作</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -89,31 +89,31 @@
                                     </div>
                                 {% endif %}
                                 <div class="ml-3">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    <div class="text-base font-medium text-gray-900 dark:text-white">
                                         {{ user.username or 'N/A' }}
                                     </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ user.user_id }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.user_id }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% set ip_info = user.ip_info|from_json if user.ip_info else {} %}
-                            <span class="text-sm text-gray-900 dark:text-white">{{ ip_info.get('region', '🌍 未知') }}</span>
+                            <span class="text-base text-gray-900 dark:text-white">{{ ip_info.get('region', '🌍 未知') }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' if user.language == 'zh' else 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                            <span class="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium {{ 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' if user.language == 'zh' else 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
                                 {% if user.language == 'zh' %}中文{% else %}English{% endif %}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% if user.wallet %}
-                                <code class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">{{ user.wallet[:20] }}...</code>
+                                <code class="px-2.5 py-1.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-medium">{{ user.wallet[:20] }}...</code>
                             {% else %}
-                                <span class="text-gray-400 dark:text-gray-500">未绑定</span>
+                                <span class="text-base text-gray-400 dark:text-gray-500">未绑定</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium 
+                            <span class="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium 
                                 {% if user.state == 'completed' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                 {% elif user.state == 'waiting_transfer' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                 {% elif user.state == 'wallet_verified' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
