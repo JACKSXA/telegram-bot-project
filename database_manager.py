@@ -100,6 +100,7 @@ class DatabaseManager:
                 transfer_completed INTEGER DEFAULT 0,
                 avatar_url TEXT,
                 ip_info TEXT,
+                channel TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -158,6 +159,50 @@ class DatabaseManager:
             
             users_table = users_table.replace('BIGINT', 'INTEGER')
         
+        # 业务扩展表：模板中心 / 实验 / 事件 / 旅程（与数据库类型无关）
+        templates_table = """
+            CREATE TABLE IF NOT EXISTS templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                content TEXT NOT NULL,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+
+        experiments_table = """
+            CREATE TABLE IF NOT EXISTS experiments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                exp_key TEXT NOT NULL,
+                variant TEXT NOT NULL,
+                weight INTEGER DEFAULT 50,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+
+        user_events_table = """
+            CREATE TABLE IF NOT EXISTS user_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                event TEXT NOT NULL,
+                meta TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+
+        journeys_table = """
+            CREATE TABLE IF NOT EXISTS journeys (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                journey_key TEXT NOT NULL,
+                node TEXT NOT NULL,
+                config TEXT,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+        
         try:
             self._execute(users_table)
             print(f"✅ users表已创建/已存在")
@@ -165,6 +210,15 @@ class DatabaseManager:
             print(f"✅ conversations表已创建/已存在")
             self._execute(wallet_info_table)
             print(f"✅ wallet_info表已创建/已存在")
+            # 扩展表
+            try:
+                self._execute(templates_table)
+                self._execute(experiments_table)
+                self._execute(user_events_table)
+                self._execute(journeys_table)
+                print(f"✅ 扩展表已创建/已存在")
+            except Exception as _:
+                pass
         except Exception as e:
             print(f"❌ 创建表失败: {e}")
             import traceback
@@ -323,6 +377,91 @@ class DatabaseManager:
         except Exception as e:
             print(f"获取用户失败: {e}")
             return None
+
+    # ====== 模板中心 ======
+    def get_templates(self, active_only: bool = True) -> list:
+        """获取消息模板列表"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                if active_only:
+                    cursor.execute("SELECT id, name, type, content, active, created_at FROM templates WHERE active=1 ORDER BY id DESC")
+                else:
+                    cursor.execute("SELECT id, name, type, content, active, created_at FROM templates ORDER BY id DESC")
+                return [dict(row) for row in cursor.fetchall()]
+            else:
+                conn, cursor = self._get_cursor()
+                if active_only:
+                    cursor.execute("SELECT id, name, type, content, active, created_at FROM templates WHERE active=1 ORDER BY id DESC")
+                else:
+                    cursor.execute("SELECT id, name, type, content, active, created_at FROM templates ORDER BY id DESC")
+                rows = [dict(row) for row in cursor.fetchall()]
+                conn.close()
+                return rows
+        except Exception as e:
+            print(f"获取模板失败: {e}")
+            return []
+
+    def save_template(self, name: str, type_: str, content: str, active: int = 1) -> bool:
+        """保存新模板"""
+        try:
+            if USE_POSTGRES:
+                cursor = self.conn.cursor()
+                cursor.execute("INSERT INTO templates (name, type, content, active) VALUES (%s, %s, %s, %s)", (name, type_, content, active))
+                self.conn.commit()
+                return True
+            else:
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO templates (name, type, content, active) VALUES (?, ?, ?, ?)", (name, type_, content, active))
+                conn.commit()
+                conn.close()
+                return True
+        except Exception as e:
+            print(f"保存模板失败: {e}")
+            return False
+
+    # ====== 渠道漏斗 ======
+    def get_funnel_by_channel(self) -> list:
+        """按渠道统计漏斗"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                cursor.execute(
+                    """
+                    SELECT COALESCE(channel,'unknown') AS channel,
+                           COUNT(*) AS total,
+                           SUM(CASE WHEN COALESCE(wallet,'') <> '' THEN 1 ELSE 0 END) AS wallet_bound,
+                           SUM(CASE WHEN state IN ('waiting_customer_service','waiting') THEN 1 ELSE 0 END) AS waiting_cs,
+                           SUM(CASE WHEN state IN ('bound_and_ready','bound','completed') THEN 1 ELSE 0 END) AS bound_ready,
+                           SUM(CASE WHEN transfer_completed = TRUE OR transfer_completed = 1 THEN 1 ELSE 0 END) AS transfer_completed
+                    FROM users
+                    GROUP BY COALESCE(channel,'unknown')
+                    ORDER BY total DESC
+                    """
+                )
+                return [dict(row) for row in cursor.fetchall()]
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute(
+                    """
+                    SELECT IFNULL(channel,'unknown') AS channel,
+                           COUNT(*) AS total,
+                           SUM(CASE WHEN IFNULL(wallet,'') <> '' THEN 1 ELSE 0 END) AS wallet_bound,
+                           SUM(CASE WHEN state IN ('waiting_customer_service','waiting') THEN 1 ELSE 0 END) AS waiting_cs,
+                           SUM(CASE WHEN state IN ('bound_and_ready','bound','completed') THEN 1 ELSE 0 END) AS bound_ready,
+                           SUM(CASE WHEN transfer_completed = 1 THEN 1 ELSE 0 END) AS transfer_completed
+                    FROM users
+                    GROUP BY IFNULL(channel,'unknown')
+                    ORDER BY total DESC
+                    """
+                )
+                rows = [dict(row) for row in cursor.fetchall()]
+                conn.close()
+                return rows
+        except Exception as e:
+            print(f"按渠道统计失败: {e}")
+            return []
 
     # ====== 分析统计：直接数据库聚合，避免内存不同步 ======
     def get_analytics_snapshot(self) -> Dict[str, Any]:
