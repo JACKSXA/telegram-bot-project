@@ -319,15 +319,17 @@ def get_database(db_path: str = None) -> DatabaseManager:
     """获取数据库管理器实例（单例模式）"""
     global _db_manager
     
-    # 暂时禁用PostgreSQL，使用SQLite
-    # postgres_url = os.getenv('DATABASE_URL')
-    # if postgres_url and postgres_url.startswith('postgresql://'):
-    #     # 使用PostgreSQL
-    #     if _db_manager is None:
-    #         _db_manager = DatabaseManager()
-    #     return _db_manager
+    # 检查PostgreSQL环境变量
+    postgres_url = os.getenv('DATABASE_URL')
+    if postgres_url and postgres_url.startswith('postgresql://'):
+        # 使用PostgreSQL
+        print("✅ 检测到PostgreSQL，使用云数据库")
+        if _db_manager is None:
+            _db_manager = DatabaseManager()
+        return _db_manager
     
     # 使用SQLite（默认）
+    print("📁 使用SQLite数据库")
     if _db_manager is None:
         _db_manager = DatabaseManager(db_path)
     return _db_manager
