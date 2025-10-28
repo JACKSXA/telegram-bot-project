@@ -740,6 +740,44 @@ class DatabaseManager:
                 'bound_ready': 0,
                 'transfer_completed': 0,
             }
+    
+    # ====== 用户细分系统 ======
+    def calculate_user_rfm(self, user_id: int) -> Dict[str, str]:
+        """计算用户RFM指标"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                cursor.execute("SELECT event, timestamp FROM user_events WHERE user_id = %s ORDER BY timestamp DESC", (user_id,))
+                events = [dict(row) for row in cursor.fetchall()]
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("SELECT event, timestamp FROM user_events WHERE user_id = ? ORDER BY timestamp DESC", (user_id,))
+                events = [dict(row) for row in cursor.fetchall()]
+                if self.db_path != ":memory:":
+                    conn.close()
+            
+            r_score = '1'; f_score = '1'; m_score = '1'
+            if events:
+                latest_event = events[0]
+                days_ago = (datetime.now() - datetime.fromisoformat(latest_event['timestamp'])).days
+                if days_ago <= 30: r_score = '5'
+                elif days_ago <= 60: r_score = '4'
+                elif days_ago <= 90: r_score = '3'
+                elif days_ago <= 180: r_score = '2'
+                
+                total_events = len(events)
+                if total_events >= 50: f_score = '5'
+                elif total_events >= 20: f_score = '4'
+                elif total_events >= 10: f_score = '3'
+                elif total_events >= 5: f_score = '2'
+            
+            user = self.get_user(user_id)
+            if user and user.get('wallet'): m_score = '5'
+            
+            return {'recency': r_score, 'frequency': f_score, 'monetary': m_score, 'rfm_total': f"{r_score}{f_score}{m_score}"}
+        except Exception as e:
+            print(f"计算RFM失败: {e}")
+            return {'recency': '1', 'frequency': '1', 'monetary': '1', 'rfm_total': '111'}
 
 # 全局数据库管理器实例
 _db_manager = None

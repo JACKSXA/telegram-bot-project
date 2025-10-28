@@ -974,6 +974,19 @@ def api_check_journey_trigger(journey_key):
         logger.error(f"检查旅程失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/users/<int:user_id>/rfm')
+def api_user_rfm(user_id):
+    """获取用户RFM指标"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        rfm = db.calculate_user_rfm(user_id)
+        return jsonify({'success': True, 'rfm': rfm})
+    except Exception as e:
+        logger.error(f"计算RFM失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))
