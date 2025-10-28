@@ -339,8 +339,7 @@ def users():
             created_at = data.get('created_at')
             if created_at:
                 try:
-                    from datetime import datetime
-                    # 如果created_at是字符串，需要解析
+                                        # 如果created_at是字符串，需要解析
                     if isinstance(created_at, str):
                         created_at = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
                     if created_at < date_filter:
@@ -356,7 +355,6 @@ def users():
                 if conversations and len(conversations) > 0:
                     last_time = conversations[-1].get('timestamp')
                     if isinstance(last_time, str):
-                        from datetime import datetime
                         last_time = datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
                     if last_time < activity_filter:
                         continue
