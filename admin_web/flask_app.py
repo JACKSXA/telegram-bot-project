@@ -223,7 +223,15 @@ def dashboard():
         'step5_transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False))
     }
     
-    return render_template('dashboard.html', stats=stats, recent_users=recent_users, funnel=funnel)
+    # 使用 Tailwind 模板
+    return render_template('dashboard_tailwind.html', 
+                         stats=stats, 
+                         recent_users=recent_users, 
+                         funnel=funnel,
+                         users=load_sessions(),
+                         active_users=stats['active_sessions'],
+                         today_users=stats['new_users_today'],
+                         completed_count=sum(1 for u in sessions.values() if u.get('transfer_completed', False)))
 
 @app.route('/analytics')
 def analytics():

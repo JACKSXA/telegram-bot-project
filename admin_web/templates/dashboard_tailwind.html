@@ -1,0 +1,117 @@
+{% extends "base_tailwind.html" %}
+
+{% block title %}仪表板 - Bot管理后台{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-2xl">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">仪表板</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">欢迎来到 Bot 管理后台</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <!-- Total Users -->
+        <div class="rounded-[10px] bg-white px-6 py-4 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">总用户数</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ users|length }}</h3>
+                </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                    <i class="fas fa-users text-xl text-blue-600 dark:text-blue-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Users -->
+        <div class="rounded-[10px] bg-white px-6 py-4 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">活跃用户</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ active_users }}</h3>
+                </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                    <i class="fas fa-user-check text-xl text-green-600 dark:text-green-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Users -->
+        <div class="rounded-[10px] bg-white px-6 py-4 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">今日新增</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ today_users }}</h3>
+                </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
+                    <i class="fas fa-user-plus text-xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="rounded-[10px] bg-white px-6 py-4 shadow-md dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">已完成</p>
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ completed_count }}</h3>
+                </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
+                    <i class="fas fa-check-circle text-xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="rounded-[10px] bg-white shadow-md dark:bg-gray-800">
+        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">最近用户</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">用户</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">语言</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">状态</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">时间</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for user in recent_users %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="fas fa-user-circle text-2xl text-gray-400 mr-3"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ user.username or user.first_name or 'Unknown' }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">{{ user.user_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs rounded-full {{ 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' if user.language_code == 'zh' else 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                                {% if user.language_code == 'zh' %}中文{% else %}English{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' if user.state == 'completed' else 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
+                                {% if user.state == 'completed' %}已完成{% elif user.state == 'waiting_transfer' %}等待转账{% elif user.state == 'wallet_verified' %}已验证{% elif user.state == 'waiting_wallet' %}等待钱包{% else %}空闲{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ user.timestamp.strftime('%Y-%m-%d %H:%M') if user.timestamp else 'Unknown' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

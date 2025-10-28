@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bot管理后台{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        /* 滚动条样式 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body 
+    x-data="{ 
+        darkMode: false, 
+        sidebarToggle: false 
+    }"
+    x-init="
+        darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+        $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))
+    "
+    :class="{ 'dark bg-gray-900': darkMode }"
+    class="bg-gray-50 dark:bg-gray-900"
+>
+    <!-- ===== Preloader Start ===== -->
+    <div id="preloader" class="hidden fixed inset-0 bg-white dark:bg-gray-900 z-[9999] flex items-center justify-center">
+        <div class="loader"></div>
+    </div>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- ===== Sidebar Start ===== -->
+        <aside 
+            :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+            class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-black px-5 lg:static lg:translate-x-0 transition-transform duration-300"
+        >
+            <!-- SIDEBAR HEADER -->
+            <div class="flex items-center justify-between pt-8 pb-7">
+                <a href="/" class="flex items-center gap-2">
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">
+                        <i class="fas fa-robot"></i> Bot Admin
+                    </span>
+                </a>
+            </div>
+            <!-- SIDEBAR HEADER -->
+
+            <!-- MENU -->
+            <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+                <nav>
+                    <!-- Dashboard -->
+                    <div class="mb-6">
+                        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">菜单</h3>
+                        <ul class="flex flex-col gap-4">
+                            <li>
+                                <a href="/" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/' else '' }}">
+                                    <i class="fas fa-home"></i>
+                                    <span>仪表板</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/users" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/users' else '' }}">
+                                    <i class="fas fa-users"></i>
+                                    <span>用户管理</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/analytics" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/analytics' else '' }}">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>数据分析</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/push" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/push' else '' }}">
+                                    <i class="fas fa-bullhorn"></i>
+                                    <span>消息推送</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Dark Mode Toggle -->
+                    <div class="mb-6">
+                        <button 
+                            @click="darkMode = !darkMode"
+                            class="flex items-center gap-3 w-full rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                        >
+                            <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="text-yellow-500"></i>
+                            <span x-text="darkMode ? '浅色模式' : '深色模式'"></span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+        <!-- ===== Sidebar End ===== -->
+
+        <!-- ===== Content Area Start ===== -->
+        <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <!-- ===== Header Start ===== -->
+            <header class="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900 lg:static lg:z-auto">
+                <!-- Mobile Sidebar Toggle -->
+                <button 
+                    @click="sidebarToggle = !sidebarToggle"
+                    class="lg:hidden text-gray-600 dark:text-gray-300"
+                >
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <div class="hidden lg:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-user-circle"></i>
+                        <span>管理员</span>
+                    </div>
+                </div>
+            </header>
+            <!-- ===== Header End ===== -->
+
+            <!-- ===== Main Content Start ===== -->
+            <main class="flex-1 overflow-x-hidden">
+                <div class="p-4 md:p-6">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+            <!-- ===== Main Content End ===== -->
+        </div>
+        <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+    <!-- Overlay for mobile -->
+    <div 
+        @click="sidebarToggle = false"
+        :class="sidebarToggle ? 'block' : 'hidden'"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[9998] lg:hidden"
+    ></div>
+</body>
+</html>
+
