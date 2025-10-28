@@ -555,6 +555,8 @@ def send_user_message(user_id):
 @app.route('/push', methods=['GET', 'POST'])
 def push():
     """消息推送"""
+    if request.method == 'POST' and not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
