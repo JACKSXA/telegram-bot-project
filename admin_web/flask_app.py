@@ -48,8 +48,7 @@ try:
     
     from database_manager import get_database
     db = get_database()
-    logger = logging.getLogger(__name__)
-    logger.info("✅ 数据库管理器导入成功")
+    print("✅ 数据库管理器导入成功")
 except Exception as e:
     print(f"❌ 数据库管理器导入失败: {e}")
     import traceback
@@ -83,9 +82,11 @@ def from_json_filter(value):
 # 初始化数据库（启动时执行）
 try:
     users = db.get_all_users()
-    logger.info(f"✅ 数据库已加载，当前有 {len(users)} 个用户")
+    print(f"✅ 数据库已加载，当前有 {len(users)} 个用户")
 except Exception as e:
-    logger.error(f"❌ 数据库加载失败: {e}")
+    print(f"❌ 数据库加载失败: {e}")
+    import traceback
+    traceback.print_exc()
 
 # 配置
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -317,7 +318,7 @@ def delete_user(user_id):
             
         return jsonify({'success': True})
     except Exception as e:
-        logger.error(f"删除用户失败: {e}")
+        print(f"删除用户失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/user/<int:user_id>')
