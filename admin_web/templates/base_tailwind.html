@@ -26,71 +26,110 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        
+        /* 菜单激活状态 */
+        .menu-active {
+            background-color: #f3f4f6;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .dark .menu-active {
+            background-color: #1f2937;
+            color: #818cf8;
+        }
+        
+        /* 表格圆角 */
+        .table-container {
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        
+        /* 卡片悬停效果 */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
     </style>
 </head>
 <body 
     x-data="{ 
         darkMode: false, 
-        sidebarToggle: false 
+        sidebarToggle: false,
+        currentPath: '{{ request.path }}'
     }"
     x-init="
         darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))
     "
-    :class="{ 'dark bg-gray-900': darkMode }"
     class="bg-gray-50 dark:bg-gray-900"
 >
-    <!-- ===== Preloader Start ===== -->
-    <div id="preloader" class="hidden fixed inset-0 bg-white dark:bg-gray-900 z-[9999] flex items-center justify-center">
-        <div class="loader"></div>
-    </div>
-    <!-- ===== Preloader End ===== -->
-
     <!-- ===== Page Wrapper Start ===== -->
     <div class="flex h-screen overflow-hidden">
         <!-- ===== Sidebar Start ===== -->
         <aside 
             :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-            class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-black px-5 lg:static lg:translate-x-0 transition-transform duration-300"
+            class="sidebar fixed left-0 top-0 z-[9999] flex h-screen w-[260px] flex-col overflow-y-hidden border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 px-4 lg:static lg:translate-x-0 transition-transform duration-300"
         >
             <!-- SIDEBAR HEADER -->
-            <div class="flex items-center justify-between pt-8 pb-7">
-                <a href="/" class="flex items-center gap-2">
+            <div class="flex items-center justify-between pt-6 pb-5">
+                <a href="/dashboard" class="flex items-center gap-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+                        <i class="fas fa-robot text-xl text-white"></i>
+                    </div>
                     <span class="text-xl font-bold text-gray-900 dark:text-white">
-                        <i class="fas fa-robot"></i> Bot Admin
+                        Bot Admin
                     </span>
                 </a>
             </div>
             <!-- SIDEBAR HEADER -->
 
             <!-- MENU -->
-            <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+            <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar flex-1">
                 <nav>
                     <!-- Dashboard -->
-                    <div class="mb-6">
-                        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">菜单</h3>
-                        <ul class="flex flex-col gap-4">
+                    <div class="mb-4">
+                        <h3 class="mb-3 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">菜单</h3>
+                        <ul class="flex flex-col gap-1">
                             <li>
-                                <a href="/" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/' else '' }}">
-                                    <i class="fas fa-home"></i>
+                                <a 
+                                    href="/dashboard" 
+                                    x-bind:class="currentPath === '/dashboard' || currentPath === '/' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-home w-5"></i>
                                     <span>仪表板</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="/users" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/users' else '' }}">
-                                    <i class="fas fa-users"></i>
+                                <a 
+                                    href="/users" 
+                                    x-bind:class="currentPath === '/users' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-users w-5"></i>
                                     <span>用户管理</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="/analytics" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/analytics' else '' }}">
-                                    <i class="fas fa-chart-line"></i>
+                                <a 
+                                    href="/analytics" 
+                                    x-bind:class="currentPath === '/analytics' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-chart-line w-5"></i>
                                     <span>数据分析</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="/push" class="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {{ 'bg-gray-100 dark:bg-gray-800 font-semibold text-primary-600 dark:text-primary-400' if request.path == '/push' else '' }}">
-                                    <i class="fas fa-bullhorn"></i>
+                                <a 
+                                    href="/push" 
+                                    x-bind:class="currentPath === '/push' ? 'menu-active' : ''"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <i class="fas fa-bullhorn w-5"></i>
                                     <span>消息推送</span>
                                 </a>
                             </li>
@@ -98,12 +137,12 @@
                     </div>
 
                     <!-- Dark Mode Toggle -->
-                    <div class="mb-6">
+                    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button 
                             @click="darkMode = !darkMode"
-                            class="flex items-center gap-3 w-full rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
-                            <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="text-yellow-500"></i>
+                            <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="w-5 text-yellow-500"></i>
                             <span x-text="darkMode ? '浅色模式' : '深色模式'"></span>
                         </button>
                     </div>
@@ -115,19 +154,19 @@
         <!-- ===== Content Area Start ===== -->
         <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             <!-- ===== Header Start ===== -->
-            <header class="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900 lg:static lg:z-auto">
+            <header class="sticky top-0 z-40 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
                 <!-- Mobile Sidebar Toggle -->
                 <button 
                     @click="sidebarToggle = !sidebarToggle"
-                    class="lg:hidden text-gray-600 dark:text-gray-300"
+                    class="lg:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <i class="fas fa-bars text-xl"></i>
                 </button>
 
-                <div class="flex items-center gap-4">
-                    <div class="hidden lg:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <i class="fas fa-user-circle"></i>
-                        <span>管理员</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-user-circle text-xl"></i>
+                        <span class="hidden sm:inline">管理员</span>
                     </div>
                 </div>
             </header>
@@ -148,9 +187,11 @@
     <!-- Overlay for mobile -->
     <div 
         @click="sidebarToggle = false"
-        :class="sidebarToggle ? 'block' : 'hidden'"
+        x-show="sidebarToggle"
         class="fixed inset-0 bg-black bg-opacity-50 z-[9998] lg:hidden"
+        x-transition:enter="transition-opacity duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
     ></div>
 </body>
 </html>
-
