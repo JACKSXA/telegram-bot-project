@@ -907,6 +907,40 @@ def api_funnel_by_channel():
         logger.error(f"按渠道统计失败: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/experiments', methods=['POST'])
+def api_create_experiment():
+    """创建A/B测试实验"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    data = request.json
+    exp_key = data.get('exp_key')
+    variant = data.get('variant')
+    weight = data.get('weight', 50)
+    
+    if not all([exp_key, variant]):
+        return jsonify({'success': False, 'error': 'Missing params'})
+    
+    try:
+        result = db.create_experiment(exp_key, variant, weight)
+        return jsonify({'success': result})
+    except Exception as e:
+        logger.error(f"创建实验失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/experiments/<exp_key>/variant')
+def api_get_variant(exp_key):
+    """获取实验变体"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        variant = db.get_experiment_variant(exp_key)
+        return jsonify({'success': True, 'variant': variant})
+    except Exception as e:
+        logger.error(f"获取变体失败: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))

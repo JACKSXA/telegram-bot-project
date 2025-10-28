@@ -413,6 +413,81 @@ class DatabaseManager:
             print(f"获取用户失败: {e}")
             return None
 
+    # ====== A/B 测试引擎 ======
+    def create_experiment(self, exp_key: str, variant: str, weight: int = 50) -> bool:
+        """创建A/B测试实验"""
+        try:
+            if USE_POSTGRES:
+                cursor = self.conn.cursor()
+                cursor.execute("INSERT INTO experiments (exp_key, variant, weight, active) VALUES (%s, %s, %s, 1)", (exp_key, variant, weight))
+                self.conn.commit()
+                return True
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("INSERT INTO experiments (exp_key, variant, weight, active) VALUES (?, ?, ?, 1)", (exp_key, variant, weight))
+                conn.commit()
+                if self.db_path != ":memory:":
+                    conn.close()
+                return True
+        except Exception as e:
+            print(f"创建实验失败: {e}")
+            return False
+    
+    def get_experiment_variant(self, exp_key: str) -> Optional[str]:
+        """获取用户应使用的实验变体"""
+        try:
+            if USE_POSTGRES:
+                cursor = self._get_cursor()
+                cursor.execute("SELECT variant, weight FROM experiments WHERE exp_key = %s AND active = 1", (exp_key,))
+                rows = cursor.fetchall()
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("SELECT variant, weight FROM experiments WHERE exp_key = ? AND active = 1", (exp_key,))
+                rows = cursor.fetchall()
+                if self.db_path != ":memory:":
+                    conn.close()
+            
+            if not rows:
+                return None
+            
+            # 按权重随机分配
+            import random
+            variants = [(r['variant'], r['weight']) for r in rows]
+            total_weight = sum(w for _, w in variants)
+            if total_weight == 0:
+                return variants[0][0] if variants else None
+            
+            r = random.random() * total_weight
+            cumsum = 0
+            for variant, weight in variants:
+                cumsum += weight
+                if r < cumsum:
+                    return variant
+            return variants[-1][0] if variants else None
+        except Exception as e:
+            print(f"获取实验变体失败: {e}")
+            return None
+    
+    def record_user_event(self, user_id: int, event: str, meta: Dict[str, Any] = None) -> bool:
+        """记录用户事件（用于A/B测试和旅程）"""
+        try:
+            meta_json = json.dumps(meta) if meta else None
+            if USE_POSTGRES:
+                cursor = self.conn.cursor()
+                cursor.execute("INSERT INTO user_events (user_id, event, meta) VALUES (%s, %s, %s)", (user_id, event, meta_json))
+                self.conn.commit()
+                return True
+            else:
+                conn, cursor = self._get_cursor()
+                cursor.execute("INSERT INTO user_events (user_id, event, meta) VALUES (?, ?, ?)", (user_id, event, meta_json))
+                conn.commit()
+                if self.db_path != ":memory:":
+                    conn.close()
+                return True
+        except Exception as e:
+            print(f"记录事件失败: {e}")
+            return False
+    
     # ====== 模板中心 ======
     def get_templates(self, active_only: bool = True) -> list:
         """获取消息模板列表"""
