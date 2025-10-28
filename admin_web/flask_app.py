@@ -383,6 +383,17 @@ def user_detail(user_id):
     
     return render_template('user_detail_tailwind.html', user_id=user_id, user_data=user_data_dict)
 
+@app.route('/user/<int:user_id>/history')
+def user_history(user_id):
+    """返回用户对话历史（JSON），按时间升序"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    try:
+        conversations = db.get_conversations(user_id, limit=200)
+        return jsonify({'success': True, 'history': conversations})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/user/<int:user_id>/update', methods=['POST'])
 def update_user(user_id):
     """更新用户信息"""

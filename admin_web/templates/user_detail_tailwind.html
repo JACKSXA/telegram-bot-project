@@ -333,5 +333,45 @@ function saveUser() {
     });
 }
 </script>
+<script>
+// 定时轮询刷新历史（每5秒）
+let lastRenderedCount = {{ user_data.get('history', [])|length }};
+async function refreshHistory() {
+    try {
+        const res = await fetch('/user/{{ user_id }}/history');
+        const data = await res.json();
+        if (!data.success) return;
+        const history = data.history || [];
+        // 仅在数量变化时重新渲染，避免闪烁
+        if (history.length !== lastRenderedCount) {
+            const container = document.getElementById('historyContainer');
+            if (container) {
+                container.innerHTML = '';
+                history.forEach(msg => {
+                    const item = document.createElement('div');
+                    const isUser = msg.role === 'user';
+                    item.className = `flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`;
+                    item.innerHTML = `
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full ${isUser ? 'bg-blue-500' : 'bg-green-500'} flex items-center justify-center">
+                                <i class="${isUser ? 'fas fa-user' : 'fas fa-robot'} text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${isUser ? '用户' : 'Bot'}</div>
+                            <div class="px-4 py-3 rounded-lg ${isUser ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-700'} text-gray-900 dark:text-white">${msg.content || ''}</div>
+                        </div>`;
+                    container.appendChild(item);
+                });
+                // 滚动到底部
+                const scrollBox = document.getElementById('historyScroll');
+                if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
+                lastRenderedCount = history.length;
+            }
+        }
+    } catch (e) {}
+}
+setInterval(refreshHistory, 5000);
+</script>
 {% endblock %}
 
