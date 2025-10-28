@@ -208,19 +208,25 @@ def dashboard():
     sessions = load_sessions()
     total_users = len(sessions)
     
+    # 统一状态集合
+    waiting_cs = sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting'])
+    bound_ready = sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed'])
+    wallet_verified = sum(1 for u in sessions.values() if u.get('state') in ['wallet_verified', 'verified'])
+    transfer_done = sum(1 for u in sessions.values() if u.get('transfer_completed', False))
+    
     # 详细统计
     stats = {
         'total_users': total_users,
-        'new_users_today': total_users,  # 暂时等于总数
-        'pending_messages': sum(1 for u in sessions.values() if u.get('state') == 'waiting_customer_service'),
+        'new_users_today': total_users,
+        'pending_messages': waiting_cs,
         'active_sessions': total_users,
-        'waiting_service': sum(1 for u in sessions.values() if u.get('state') == 'waiting_customer_service'),
-        'bound': sum(1 for u in sessions.values() if u.get('state') == 'bound_and_ready'),
-        'wallet_checked': sum(1 for u in sessions.values() if u.get('state') == 'wallet_checking'),
-        'wallet_verified': sum(1 for u in sessions.values() if u.get('state') == 'wallet_verified')
+        'waiting_service': waiting_cs,
+        'bound': bound_ready,
+        'wallet_checked': wallet_verified,
+        'wallet_verified': wallet_verified
     }
     
-    # 获取最近10个用户
+    # 最近10个用户（保持不变，略）
     recent_users = []
     for user_id, user_data in list(sessions.items())[:10]:
         recent_users.append({
@@ -228,19 +234,18 @@ def dashboard():
             'username': user_data.get('username', 'N/A'),
             'language': user_data.get('language', 'zh'),
             'state': user_data.get('state', 'idle'),
-            'created_at': None  # 暂时不显示
+            'created_at': None
         })
     
-    # 转化漏斗数据
+    # 转化漏斗
     funnel = {
-        'step1_registered': stats['total_users'],
-        'step2_wallet_created': stats['wallet_verified'] + stats['bound'],
-        'step3_waiting_service': stats['waiting_service'],
-        'step4_bound': stats['bound'],
-        'step5_transfer_completed': sum(1 for u in sessions.values() if u.get('transfer_completed', False))
+        'step1_registered': total_users,
+        'step2_wallet_created': wallet_verified + bound_ready,
+        'step3_waiting_service': waiting_cs,
+        'step4_bound': bound_ready,
+        'step5_transfer_completed': transfer_done,
     }
     
-    # 使用 Tailwind 模板
     return render_template('dashboard_tailwind.html', 
                          stats=stats, 
                          recent_users=recent_users, 
@@ -248,7 +253,25 @@ def dashboard():
                          users=load_sessions(),
                          active_users=stats['active_sessions'],
                          today_users=stats['new_users_today'],
-                         completed_count=sum(1 for u in sessions.values() if u.get('transfer_completed', False)))
+                         completed_count=transfer_done)
+
+@app.route('/api/funnel')
+def api_funnel():
+    if not session.get('logged_in'):
+        return jsonify({'success': False}), 401
+    sessions = load_sessions()
+    total = len(sessions)
+    waiting_cs = sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting'])
+    bound_ready = sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed'])
+    wallet_verified = sum(1 for u in sessions.values() if u.get('state') in ['wallet_verified', 'verified'])
+    transfer_done = sum(1 for u in sessions.values() if u.get('transfer_completed', False))
+    return jsonify({'success': True, 'funnel': {
+        'registered': total,
+        'wallet': wallet_verified + bound_ready,
+        'waiting_service': waiting_cs,
+        'bound': bound_ready,
+        'transfer_completed': transfer_done,
+    }})
 
 @app.route('/analytics')
 def analytics():

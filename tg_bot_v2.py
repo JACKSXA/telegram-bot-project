@@ -782,6 +782,57 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.warning(f"❌ 用户 {user_id} 发送了其他链地址: {user_message[:20]}")
         return
     
+    # ====== 检测用户请求客服接入 ======
+    lowered = user_message.strip().lower()
+    service_keywords = ['客服', '人工', '需要帮助', 'contact', 'support', 'service', 'help', 'assistant', 'agent']
+    if any(kw in lowered for kw in service_keywords) and chat_type == 'private':
+        set_user_state(user_id, 'waiting_customer_service')
+        
+        if lang == 'zh':
+            tip = (
+                "💼 <b>客服接入确认</b>\n\n"
+                "您将转接至真人客服，可获得：\n"
+                "• 一对一专业指导\n"
+                "• 实时答疑解惑\n"
+                "• 专属账户配置\n\n"
+                "请添加客服账号：\n"
+                "👉 <b>@CK_PC</b>\n\n"
+                "添加时请说明：量化账户咨询\n"
+                "客服将在1分钟内为您服务。\n\n"
+                "⚠️ 请注意：仅接受以上账号，谨防诈骗！")
+        else:
+            tip = (
+                "💼 <b>Confirm Service Connection</b>\n\n"
+                "You will be connected to a human agent who can provide:\n"
+                "• One-on-one professional guidance\n"
+                "• Real-time Q&A\n"
+                "• Dedicated account configuration\n\n"
+                "Please add service account:\n"
+                "👉 <b>@CK_PC</b>\n\n"
+                "Please mention: Quantitative account consultation\n"
+                "Service will respond within 1 minute.\n\n"
+                "⚠️ Note: Only accept the above account to prevent scams!")
+        
+        await update.message.reply_text(tip, parse_mode='HTML')
+        
+        # 通知管理员
+        admin_msg = f"🆕 用户请求客服接入\n"
+        admin_msg += f"━━━━━━━━━━━━━━━━━━\n\n"
+        admin_msg += f"👤 <b>用户信息</b>\n"
+        admin_msg += f"├ 用户ID: <code>{user_id}</code>\n"
+        if update.effective_user.username:
+            admin_msg += f"├ 用户名: @{update.effective_user.username}\n"
+        admin_msg += f"├ 姓名: {update.effective_user.first_name or ''} {update.effective_user.last_name or ''}\n"
+        admin_msg += f"└ 语言: {lang.upper()}\n\n"
+        admin_msg += f"💬 <b>用户消息</b>\n"
+        admin_msg += f"<code>{user_message[:100]}</code>\n\n"
+        admin_msg += f"━━━━━━━━━━━━━━━━━━\n"
+        admin_msg += f"⚡ <b>用户正在添加客服账号，请准备接洽</b>"
+        
+        await notify_admin(context, admin_msg)
+        logger.info(f"✅ 用户 {user_id} 已触发客服接入")
+        return
+    
     # 检测是否为Solana地址（自动验证）
     if is_valid_solana_address(user_message):
         # 检查用户是否已经绑定过钱包
