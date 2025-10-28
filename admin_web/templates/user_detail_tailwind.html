@@ -238,8 +238,8 @@ function sendQuickMessage() {
             
             // 清空输入框
             messageInput.value = '';
-            
-            // 不再自动刷新，防止刚追加的消息闪退
+            // 强制拉取一次最新历史，确保与数据库同步
+            refreshHistory(true);
         } else {
             alert('发送失败：' + (data.error || '未知错误'));
         }

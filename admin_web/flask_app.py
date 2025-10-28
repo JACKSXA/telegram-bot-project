@@ -390,13 +390,16 @@ def user_history(user_id):
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
     try:
         conversations = db.get_conversations(user_id, limit=200)
+        print(f"[HISTORY] fetch {user_id} -> {len(conversations)} rows")
         # 兜底：如果数据库为空，同时尝试从旧sessions中读取
         if not conversations:
             sessions = load_sessions()
             history = (sessions.get(user_id, {}) or {}).get('history', [])
+            print(f"[HISTORY] fallback sessions -> {len(history)} rows")
             return jsonify({'success': True, 'history': history})
         return jsonify({'success': True, 'history': conversations})
     except Exception as e:
+        print(f"[HISTORY][ERROR] {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/user/<int:user_id>/update', methods=['POST'])

@@ -270,7 +270,7 @@ class DatabaseManager:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO conversations (user_id, role, content) VALUES (?, ?, ?)",
-                             (user_id, role, content))
+                             (int(user_id), str(role), str(content)))
                 conn.commit()
                 conn.close()
         except Exception as e:
