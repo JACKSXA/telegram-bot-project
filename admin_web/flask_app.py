@@ -626,6 +626,50 @@ def stats():
     
     return render_template('stats.html', stats=stats)
 
+@app.route('/api/bot-health')
+def bot_health():
+    """检查Bot健康状态"""
+    import requests
+    try:
+        resp = requests.get('https://api.telegram.org/bot7751111095:AAGy0YC7sVndtxboAaKYm1P_WPDsip9XVx0/getMe', timeout=3)
+        data = resp.json()
+        return jsonify({'ok': data.get('ok', False), 'result': data.get('result', {})})
+    except:
+        return jsonify({'ok': False})
+
+@app.route('/api/system-stats')
+def system_stats():
+    """系统统计（Bot状态、数据库状态）"""
+    import sqlite3
+    stats = {
+        'bot_online': False,
+        'db_connected': False,
+        'total_users': 0,
+        'total_conversations': 0
+    }
+    
+    # 检查Bot
+    try:
+        resp = requests.get('https://api.telegram.org/bot7751111095:AAGy0YC7sVndtxboAaKYm1P_WPDsip9XVx0/getMe', timeout=3)
+        stats['bot_online'] = resp.json().get('ok', False)
+    except:
+        pass
+    
+    # 检查数据库
+    try:
+        conn = sqlite3.connect('user_data.db')
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM users")
+        stats['total_users'] = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM conversations")
+        stats['total_conversations'] = cur.fetchone()[0]
+        stats['db_connected'] = True
+        conn.close()
+    except:
+        pass
+    
+    return jsonify(stats)
+
 if __name__ == '__main__':
     # 支持Railway和命令行两种启动方式
     port = int(os.environ.get('PORT', 5000))
