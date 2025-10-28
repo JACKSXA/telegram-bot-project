@@ -296,11 +296,17 @@ def analytics():
     # 转化率计算
     total = len(sessions)
     if total > 0:
+        # 统一状态统计
+        wallet_bound = sum(1 for u in sessions.values() if u.get('wallet'))
+        waiting_cs = sum(1 for u in sessions.values() if u.get('state') in ['waiting_customer_service', 'waiting'])
+        bound_ready = sum(1 for u in sessions.values() if u.get('state') in ['bound_and_ready', 'bound', 'completed'])
+        transfer_completed = sum(1 for u in sessions.values() if u.get('transfer_completed', False))
+        
         conversion_rates = {
-            'to_wallet': (sum(1 for u in sessions.values() if u.get('wallet')) / total * 100) if total else 0,
-            'to_service': (sum(1 for u in sessions.values() if u.get('state') == 'waiting_customer_service') / total * 100) if total else 0,
-            'to_bound': (sum(1 for u in sessions.values() if u.get('state') == 'bound_and_ready') / total * 100) if total else 0,
-            'to_transfer': (sum(1 for u in sessions.values() if u.get('transfer_completed', False)) / total * 100) if total else 0
+            'to_wallet': (wallet_bound / total * 100) if total else 0,
+            'to_service': (waiting_cs / total * 100) if total else 0,
+            'to_bound': (bound_ready / total * 100) if total else 0,
+            'to_transfer': (transfer_completed / total * 100) if total else 0
         }
     else:
         conversion_rates = {'to_wallet': 0, 'to_service': 0, 'to_bound': 0, 'to_transfer': 0}

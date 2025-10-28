@@ -42,7 +42,7 @@
         <div class="stat-card rounded-[10px] bg-white px-6 py-5 shadow-md dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">服务转化率</p>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">客服转化率</p>
                     <h3 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ "%.1f"|format(data.conversion_rates.to_service) }}%</h3>
                 </div>
                 <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/30">
@@ -79,12 +79,13 @@
                     {% set completed_count = data.state_distribution.get('completed', 0) %}
                     {% set waiting_transfer_count = data.state_distribution.get('waiting_transfer', 0) %}
                     {% set wallet_verified_count = data.state_distribution.get('wallet_verified', 0) %}
-                    {% set waiting_wallet_count = data.state_distribution.get('waiting_wallet', 0) %}
+                    {% set bound_ready_count = data.state_distribution.get('bound_and_ready', 0) + data.state_distribution.get('bound', 0) %}
+                    {% set waiting_cs_count = data.state_distribution.get('waiting_customer_service', 0) + data.state_distribution.get('waiting', 0) %}
                     
                     {% set steps = [
                         ('注册用户', data.total_users, 'blue'),
-                        ('已绑定钱包', wallet_verified_count + waiting_transfer_count + completed_count, 'green'),
-                        ('等待转账', waiting_transfer_count, 'yellow'),
+                        ('已绑定钱包', wallet_verified_count + bound_ready_count, 'green'),
+                        ('等待客服', waiting_cs_count, 'yellow'),
                         ('转账完成', completed_count, 'pink')
                     ] %}
                     
