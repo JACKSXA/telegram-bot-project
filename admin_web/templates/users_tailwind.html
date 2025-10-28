@@ -205,30 +205,81 @@ function filterTable() {
     });
 }
 
+// 自定义删除确认模态
 function deleteUser(userId) {
-    if (!confirm('确定要删除这个用户吗？此操作不可恢复！')) {
-        return;
-    }
-    
+    const modal = document.getElementById('deleteModal');
+    modal.dataset.userid = String(userId);
+    const idText = document.getElementById('deleteUserIdText');
+    if (idText) idText.textContent = String(userId);
+    modal.classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+}
+
+function performDelete() {
+    const modal = document.getElementById('deleteModal');
+    const userId = modal.dataset.userid;
+    if (!userId) return;
+
     fetch(`/user/${userId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
         if (data.success) {
-            alert('用户已删除');
-            location.reload();
+            // 移除对应行
+            const row = document.querySelector(`tr[data-userid="${userId}"]`);
+            if (row) row.remove();
+            showToast('用户已删除');
+            closeDeleteModal();
         } else {
-            alert('删除失败: ' + data.error);
+            showToast('删除失败：' + (data.error || '未知错误'), true);
         }
     })
-    .catch(error => {
-        alert('删除失败: ' + error);
+    .catch(err => {
+        showToast('删除失败：' + err, true);
     });
 }
+
+function showToast(text, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `${isError ? 'bg-red-500' : 'bg-green-500'} fixed top-20 right-6 text-white px-5 py-3 rounded-lg shadow-lg z-50`;
+    toast.textContent = text;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity .3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
 </script>
+    
+<!-- 删除确认模态框 -->
+<div id="deleteModal" class="hidden fixed inset-0 z-40">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 shadow-xl">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                    确认删除
+                </h3>
+            </div>
+            <div class="px-5 py-4 text-gray-700 dark:text-gray-300">
+                确定要删除用户 <span class="font-semibold text-gray-900 dark:text-white" id="deleteUserIdText"></span> 吗？此操作不可恢复。
+            </div>
+            <div class="px-5 py-4 flex gap-3 justify-end border-t border-gray-200 dark:border-gray-700">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">取消</button>
+                <button onclick="performDelete()" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
